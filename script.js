@@ -530,19 +530,16 @@ function initOCR() {
                 try {
                     ocrStatusText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 预热OCR引擎...';
                     const testWorker = await Tesseract.createWorker({
-                        workerPath: './libs/worker.min.js',
-                        langPath: './libs/tessdata',
-                        corePath: './libs/tesseract-core.wasm.js',
                         logger: () => {} // 静默日志
                     });
                     await testWorker.terminate();
                     ocrStatusText.innerHTML = '<i class="fas fa-check-circle" style="color: #28a745;"></i> OCR引擎预热完成，可以使用';
                 } catch (preloadError) {
                     console.warn('OCR预加载失败:', preloadError);
-                    ocrStatusText.innerHTML = '<i class="fas fa-check-circle" style="color: #28a745;"></i> OCR引擎已加载（可能需要网络）';
+                    ocrStatusText.innerHTML = '<i class="fas fa-check-circle" style="color: #28a745;"></i> OCR引擎已加载（需要网络连接）';
                 }
             } else {
-                ocrStatusText.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #ffc107;"></i> OCR引擎未加载，请启动本地服务器';
+                ocrStatusText.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #ffc107;"></i> OCR引擎未加载，请检查网络连接';
             }
         } catch (error) {
             console.error('OCR状态检查失败:', error);
@@ -586,7 +583,7 @@ function initOCR() {
             // 检查Tesseract是否可用
             const tesseractLoaded = await checkTesseractLoaded();
             if (!tesseractLoaded) {
-                throw new Error('OCR库未加载，请启动本地服务器或检查网络连接');
+                throw new Error('OCR库未加载，请检查网络连接');
             }
             
             showNotification('正在初始化文字识别引擎...', 'info');
@@ -594,11 +591,8 @@ function initOCR() {
                             // 使用简化的Worker创建方式
                 let worker;
                 try {
-                    // 创建worker时指定本地路径
+                    // 创建worker使用在线CDN资源
                     worker = await Tesseract.createWorker({
-                        workerPath: './libs/worker.min.js',
-                        langPath: './libs/tessdata',
-                        corePath: './libs/tesseract-core.wasm.js',
                         logger: m => {
                             console.log('Tesseract:', m);
                             if (m.status === 'loading tesseract core') {
@@ -728,10 +722,10 @@ function initOCR() {
             case 'network':
                 suggestions.push(
                     '🌐 网络问题解决方案：',
-                    '1. 启动本地服务器 (双击启动服务器.py)',
-                    '2. 检查网络连接是否正常',
-                    '3. 尝试更换网络环境',
-                    '4. 等待网络稳定后重试'
+                    '1. 检查网络连接是否正常',
+                    '2. 尝试更换网络环境',
+                    '3. 等待网络稳定后重试',
+                    '4. 确保可以访问CDN资源'
                 );
                 break;
                 
@@ -750,7 +744,7 @@ function initOCR() {
                 suggestions.push(
                     '🔧 引擎问题解决方案：',
                     '1. 刷新页面重新加载',
-                    '2. 启动本地服务器环境',
+                    '2. 确保网络连接正常',
                     '3. 使用Chrome或Firefox浏览器',
                     '4. 清除浏览器缓存后重试'
                 );
@@ -760,9 +754,9 @@ function initOCR() {
                 suggestions.push(
                     '🛠️ 通用解决方案：',
                     '1. 刷新页面重试',
-                    '2. 启动本地服务器 (双击启动服务器.py)',
+                    '2. 检查网络连接是否正常',
                     '3. 使用Chrome或Firefox浏览器',
-                    '4. 检查网络连接'
+                    '4. 尝试更换网络环境'
                 );
         }
         
