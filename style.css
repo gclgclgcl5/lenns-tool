@@ -17,40 +17,20 @@ body {
     width: 100vw;
     height: 100vh;
     margin: 0;
-    padding: 10px;
+    padding: 5px;
     box-sizing: border-box;
     overflow: hidden;
 }
 
-/* 头部样式 */
-.header {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 1000;
-    color: white;
-    text-align: right;
-}
 
-.header h1 {
-    font-size: 1.5rem;
-    margin: 0;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-}
-
-.header p {
-    font-size: 0.9rem;
-    margin: 0;
-    opacity: 0.8;
-}
 
 /* 功能区域网格布局 */
 .functions-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    gap: 10px;
-    height: calc(100vh - 20px);
+    gap: 5px;
+    height: calc(100vh - 10px);
     width: 100%;
 }
 
@@ -717,37 +697,39 @@ textarea {
     100% { opacity: 0.8; }
 }
 
-/* 响应式设计 */
-@media (max-width: 1200px) {
+/* 响应式设计 - 优化布局确保一屏显示完所有功能 */
+@media (max-width: 1024px) {
     .functions-grid {
         grid-template-columns: 1fr 1fr;
         grid-template-rows: 1fr 1fr 1fr;
+        gap: 4px;
     }
 }
 
 @media (max-width: 768px) {
     .container {
-        padding: 5px;
-    }
-    
-    .header {
-        position: static;
-        text-align: center;
-        margin-bottom: 10px;
-    }
-    
-    .header h1 {
-        font-size: 1.2rem;
+        padding: 3px;
     }
     
     .functions-grid {
-        grid-template-columns: 1fr;
-        gap: 8px;
-        height: auto;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+        gap: 3px;
+        height: calc(100vh - 6px);
     }
     
     .function-area {
-        min-height: 250px;
+        min-height: auto;
+    }
+    
+    /* 为小屏幕优化卡片内容 */
+    .card {
+        padding: 8px;
+    }
+    
+    .card h2 {
+        font-size: 1rem;
+        margin-bottom: 8px;
     }
     
     .translator-container {
@@ -1094,5 +1076,250 @@ textarea {
     .btn.small {
         flex: 1;
         min-width: 80px;
+    }
+}
+
+/* 极小屏幕适配（手机竖屏等） - 确保一屏显示所有功能 */
+@media (max-width: 480px) {
+    .container {
+        padding: 2px;
+    }
+    
+    .functions-grid {
+        gap: 2px;
+        height: calc(100vh - 4px);
+    }
+    
+    .card {
+        padding: 6px;
+    }
+    
+    .card h2 {
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+    
+    /* 进一步压缩表单元素间距 */
+    .form-group {
+        margin-bottom: 4px;
+    }
+    
+    /* 优化按钮大小 */
+    .btn {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+    
+         /* 优化输入框 */
+     input, textarea, select {
+         font-size: 0.85rem;
+         padding: 4px;
+     }
+ }
+
+/* 设置按钮样式 */
+.settings-panel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+}
+
+.settings-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+    color: #667eea;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* 模态框样式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@keyframes modalSlideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.settings-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.settings-section h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-section p {
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.danger-zone {
+    border: 2px solid #ff4757;
+    background: #fff5f5;
+}
+
+.danger-zone h3 {
+    color: #ff4757;
+}
+
+/* 系统信息样式 */
+.system-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.info-item .label {
+    font-weight: 600;
+    color: #555;
+}
+
+.info-item .value {
+    color: #333;
+    font-family: monospace;
+}
+
+/* 按钮样式扩展 */
+.btn.danger {
+    background: linear-gradient(135deg, #ff4757, #ff3742);
+    color: white;
+}
+
+.btn.danger:hover {
+    background: linear-gradient(135deg, #ff3742, #ff2837);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .settings-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+    }
+    
+    .modal-header {
+        padding: 15px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .system-info {
+        grid-template-columns: 1fr;
     }
 } 

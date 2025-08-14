@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的百宝箱工具</title>
     <link rel="stylesheet" href="style.css">
-    <link href="libs/fontawesome.css" rel="stylesheet">
+    <!-- Font Awesome已替换为表情符号，不再需要 -->
+    <!-- <link href="libs/fontawesome.css" rel="stylesheet"> -->
 </head>
 <body>
     <div class="container">
-        <!-- 头部 -->
-        <header class="header">
-            <h1><i class="fas fa-toolbox"></i> 我的百宝箱工具</h1>
-            <p>您的专属工作助手</p>
-        </header>
+        <!-- 设置按钮 -->
+        <div class="settings-panel">
+            <button id="settings-btn" class="settings-btn" title="设置">
+                ⚙️
+            </button>
+        </div>
 
         <!-- 功能区域网格布局 -->
         <div class="functions-grid">
@@ -21,7 +23,7 @@
             <!-- 翻译工具区域 -->
             <div class="function-area translator-area">
                 <div class="card translator-card">
-                    <h2><i class="fas fa-language"></i> 文字翻译</h2>
+                    <h2>🌐 文字翻译</h2>
                     <div class="translator-container">
                         <div class="input-section">
                             <label for="source-lang">源语言:</label>
@@ -39,10 +41,10 @@
                         </div>
                         <div class="translate-btn-container">
                             <button id="translate-btn" class="btn primary">
-                                <i class="fas fa-exchange-alt"></i> 翻译
+                                🔄 翻译
                             </button>
                             <button id="swap-lang-btn" class="btn secondary">
-                                <i class="fas fa-arrows-alt-h"></i> 交换
+                                ↔️ 交换
                             </button>
                         </div>
                         <div class="output-section">
@@ -66,13 +68,13 @@
             <div class="function-area notepad-area">
                 <div class="card notepad-card">
                     <div class="notepad-header">
-                        <h2><i class="fas fa-sticky-note"></i> 记事本</h2>
+                        <h2>📝 记事本</h2>
                         <div class="notepad-controls">
                             <button id="compare-mode-btn" class="btn secondary">
-                                <i class="fas fa-columns"></i> 对比模式
+                                📖 对比模式
                             </button>
                             <button id="clear-notes-btn" class="btn secondary">
-                                <i class="fas fa-eraser"></i> 清空
+                                🧽 清空
                             </button>
                         </div>
                     </div>
@@ -92,11 +94,11 @@
             <!-- OCR文字提取区域 -->
             <div class="function-area ocr-area">
                 <div class="card ocr-card">
-                    <h2><i class="fas fa-text-height"></i> 图片文字提取</h2>
+                    <h2>🖼️ 图片文字提取</h2>
                     <div class="ocr-container">
                         <div class="upload-section">
                             <div class="drop-zone" id="drop-zone">
-                                <i class="fas fa-cloud-upload-alt"></i>
+                                ☁️
                                 <p>拖拽图片或点击选择</p>
                                 <input type="file" id="image-input" accept="image/*" style="display: none;">
                                 <button class="btn primary" onclick="document.getElementById('image-input').click()">
@@ -105,7 +107,7 @@
                             </div>
                             <div class="paste-section">
                                 <button class="btn secondary" id="paste-btn">
-                                    <i class="fas fa-clipboard"></i> 粘贴图片
+                                    📋 粘贴图片
                                 </button>
                                 <div class="ocr-status" id="ocr-status" style="margin-top: 10px;">
                                     <small id="ocr-status-text">正在加载OCR引擎...</small>
@@ -115,14 +117,14 @@
                         <div class="preview-section" id="preview-section" style="display: none;">
                             <img id="preview-image" alt="预览图片">
                             <button class="btn primary" id="extract-text-btn">
-                                <i class="fas fa-magic"></i> 提取文字
+                                ✨ 提取文字
                             </button>
                         </div>
                         <div class="result-section">
                             <label for="extracted-text">提取的文字:</label>
                             <textarea id="extracted-text" placeholder="提取的文字将在这里显示..." readonly></textarea>
                             <button class="btn secondary" id="copy-text-btn" style="display: none;">
-                                <i class="fas fa-copy"></i> 复制文字
+                                📄 复制文字
                             </button>
                         </div>
                     </div>
@@ -132,7 +134,7 @@
             <!-- 工作清单区域 -->
             <div class="function-area tasks-area">
                 <div class="card tasks-card">
-                    <h2><i class="fas fa-tasks"></i> 工作清单管理</h2>
+                    <h2>✅ 工作清单管理</h2>
                     <div class="tasks-container">
                         <div class="add-task-section">
                             <h3>添加新任务</h3>
@@ -162,7 +164,7 @@
                                     </div>
                                 </div>
                                 <button type="submit" class="btn primary">
-                                    <i class="fas fa-plus"></i> 添加任务
+                                    ➕ 添加任务
                                 </button>
                             </form>
                         </div>
@@ -183,7 +185,7 @@
             <!-- 网站收藏区域 -->
             <div class="function-area bookmarks-area">
                 <div class="card bookmarks-card">
-                    <h2><i class="fas fa-bookmark"></i> 网站收藏</h2>
+                    <h2>🔖 网站收藏</h2>
                     <div class="bookmarks-container">
                         <div class="add-bookmark-section">
                             <form id="bookmark-form">
@@ -201,7 +203,7 @@
                                     </div>
                                     <div class="form-group">
                                         <button type="submit" class="btn primary">
-                                            <i class="fas fa-plus"></i> 添加
+                                            ➕ 添加
                                         </button>
                                     </div>
                                 </div>
@@ -217,28 +219,28 @@
             <!-- 笔记本工具区域 -->
             <div class="function-area notebook-area">
                 <div class="card notebook-card">
-                    <h2><i class="fas fa-book"></i> 笔记本</h2>
+                    <h2>📔 笔记本</h2>
                     <div class="notebook-container">
                         <div class="notebook-sidebar">
                             <div class="notebook-controls">
                                 <div class="search-section">
                                     <input type="text" id="note-search" placeholder="搜索笔记..." class="note-search">
                                     <button id="clear-search-btn" class="btn small secondary">
-                                        <i class="fas fa-times"></i>
+                                        ✖️
                                     </button>
                                 </div>
                                 <div class="notebook-actions">
                                     <button id="add-note-btn" class="btn primary">
-                                        <i class="fas fa-plus"></i> 新建笔记
+                                        ➕ 新建笔记
                                     </button>
                                     <button id="export-notes-btn" class="btn secondary">
-                                        <i class="fas fa-download"></i> 导出
+                                        📥 导出
                                     </button>
                                 </div>
                             </div>
                             <div class="notes-list" id="notes-list">
                                 <div class="empty-notes">
-                                    <i class="fas fa-sticky-note"></i>
+                                    📝
                                     <p>暂无笔记<br>点击"新建笔记"开始</p>
                                 </div>
                             </div>
@@ -249,10 +251,10 @@
                                     <input type="text" id="note-title" placeholder="输入笔记标题..." class="note-title-input">
                                     <div class="note-actions">
                                         <button id="save-note-btn" class="btn primary">
-                                            <i class="fas fa-save"></i> 保存
+                                            💾 保存
                                         </button>
                                         <button id="delete-note-btn" class="btn danger">
-                                            <i class="fas fa-trash"></i> 删除
+                                            🗑️ 删除
                                         </button>
                                     </div>
                                 </div>
@@ -263,7 +265,7 @@
                                 </div>
                             </div>
                             <div class="note-welcome" id="note-welcome">
-                                <i class="fas fa-edit"></i>
+                                ✏️
                                 <h3>欢迎使用笔记本</h3>
                                 <p>选择左侧的笔记进行编辑，或创建新的笔记</p>
                                 <ul>
@@ -278,6 +280,64 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- 设置模态框 -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ 系统设置</h2>
+                <button class="close-btn" id="close-settings-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h3>📥 配置备份</h3>
+                    <p>导出所有配置数据到文件，包括任务、书签、笔记等</p>
+                    <button id="export-config-btn" class="btn primary">
+                        📤 导出配置文件
+                    </button>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>📤 配置恢复</h3>
+                    <p>从备份文件恢复所有配置数据</p>
+                    <input type="file" id="import-config-input" accept=".txt" style="display: none;">
+                    <button id="import-config-btn" class="btn secondary">
+                        📥 导入配置文件
+                    </button>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>ℹ️ 系统信息</h3>
+                    <div class="system-info">
+                        <div class="info-item">
+                            <span class="label">版本:</span>
+                            <span class="value" id="version-info">v3.0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">数据大小:</span>
+                            <span class="value" id="data-size-info">计算中...</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">任务数量:</span>
+                            <span class="value" id="tasks-count-info">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">笔记数量:</span>
+                            <span class="value" id="notes-count-info">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section danger-zone">
+                    <h3>⚠️ 危险操作</h3>
+                    <p>谨慎使用：此操作将清除所有数据且无法恢复</p>
+                    <button id="reset-all-btn" class="btn danger">
+                        🗑️ 重置所有数据
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 

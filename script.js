@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initBookmarks();
     initNotepad();
     initNotebook();
+    initSettings(); // 初始化设置功能
     loadData();
     
     // 确保DOM完全加载后再初始化拖拽
@@ -42,12 +43,12 @@ function initNotepad() {
         if (notepadCompareMode) {
             notepad2Section.style.display = 'flex';
             notepadArea.classList.add('compare-mode');
-            compareModeBtn.innerHTML = '<i class="fas fa-columns"></i> 单栏模式';
+            compareModeBtn.innerHTML = '📖 单栏模式';
             showNotification('已开启对比模式', 'info');
         } else {
             notepad2Section.style.display = 'none';
             notepadArea.classList.remove('compare-mode');
-            compareModeBtn.innerHTML = '<i class="fas fa-columns"></i> 对比模式';
+            compareModeBtn.innerHTML = '📖 对比模式';
             showNotification('已关闭对比模式', 'info');
         }
         
@@ -168,23 +169,26 @@ function initDragAndDrop() {
         });
     });
     
-    // 双击重置布局 - 监听整个网格区域
+    // 双击重置布局 - 监听整个网格区域（仅在大屏幕上有效）
     functionsGrid.addEventListener('dblclick', (e) => {
-        // 检查是否点击在功能区域之外
-        if (!e.target.closest('.function-area')) {
+        // 检查是否点击在功能区域之外，且在大屏幕上
+        if (!e.target.closest('.function-area') && window.innerWidth > 1024) {
             resetLayout();
             showNotification('布局已重置为默认顺序', 'info');
         }
     });
 }
 
-// 保存布局顺序
+// 保存布局顺序（仅在大屏幕上保存，避免保存响应式布局状态）
 function saveLayoutOrder() {
-    const functionsGrid = document.querySelector('.functions-grid');
-    const order = Array.from(functionsGrid.children).map(child => {
-        return child.className.split(' ').find(cls => cls.includes('-area'));
-    });
-    localStorage.setItem('layout-order', JSON.stringify(order));
+    // 只在大屏幕(>1024px)上保存自定义布局顺序
+    if (window.innerWidth > 1024) {
+        const functionsGrid = document.querySelector('.functions-grid');
+        const order = Array.from(functionsGrid.children).map(child => {
+            return child.className.split(' ').find(cls => cls.includes('-area'));
+        });
+        localStorage.setItem('layout-order', JSON.stringify(order));
+    }
 }
 
 // 恢复布局顺序
@@ -193,8 +197,26 @@ function restoreLayoutOrder() {
         const savedOrder = JSON.parse(localStorage.getItem('layout-order') || '[]');
         if (savedOrder.length === 0) return;
         
+        // 验证布局数据的完整性
+        const expectedAreas = [
+            'translator-area', 'notepad-area', 'ocr-area', 
+            'tasks-area', 'bookmarks-area', 'notebook-area'
+        ];
+        
         const functionsGrid = document.querySelector('.functions-grid');
         const areas = Array.from(functionsGrid.children);
+        
+        // 检查保存的布局是否包含所有必要的区域
+        const isValidLayout = expectedAreas.every(areaClass => 
+            savedOrder.includes(areaClass) && 
+            areas.some(el => el.classList.contains(areaClass))
+        );
+        
+        if (!isValidLayout) {
+            console.log('布局数据不完整，清除旧配置');
+            localStorage.removeItem('layout-order');
+            return;
+        }
         
         // 按保存的顺序重新排列
         savedOrder.forEach((areaClass) => {
@@ -205,6 +227,8 @@ function restoreLayoutOrder() {
         });
     } catch (error) {
         console.error('恢复布局顺序失败:', error);
+        // 出错时清除可能损坏的布局数据
+        localStorage.removeItem('layout-order');
     }
 }
 
@@ -215,8 +239,9 @@ function resetLayout() {
         'translator-area',
         'notepad-area', 
         'ocr-area',
+        'tasks-area',
         'bookmarks-area',
-        'tasks-area'
+        'notebook-area'
     ];
     
     defaultOrder.forEach(areaClass => {
@@ -289,7 +314,7 @@ function initTranslator() {
         }
         
         translateBtn.disabled = false;
-        translateBtn.innerHTML = '<i class="fas fa-exchange-alt"></i> 翻译';
+        translateBtn.innerHTML = '🔄 翻译';
     }
     
     async function tryMultipleTranslationAPIs(text, from, to) {
@@ -519,31 +544,31 @@ function initOCR() {
         const ocrStatusText = document.getElementById('ocr-status-text');
         if (!ocrStatusText) return;
         
-        ocrStatusText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 检查OCR引擎状态...';
+        ocrStatusText.innerHTML = '⏳ 检查OCR引擎状态...';
         
         try {
             const isLoaded = await checkTesseractLoaded();
             if (isLoaded) {
-                ocrStatusText.innerHTML = '<i class="fas fa-check-circle" style="color: #28a745;"></i> OCR引擎已就绪';
+                ocrStatusText.innerHTML = '✅ OCR引擎已就绪';
                 
                 // 尝试预加载worker以确保真正可用
                 try {
-                    ocrStatusText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 预热OCR引擎...';
+                    ocrStatusText.innerHTML = '⏳ 预热OCR引擎...';
                     const testWorker = await Tesseract.createWorker({
                         logger: () => {} // 静默日志
                     });
                     await testWorker.terminate();
-                    ocrStatusText.innerHTML = '<i class="fas fa-check-circle" style="color: #28a745;"></i> OCR引擎预热完成，可以使用';
+                    ocrStatusText.innerHTML = '✅ OCR引擎预热完成，可以使用';
                 } catch (preloadError) {
                     console.warn('OCR预加载失败:', preloadError);
-                    ocrStatusText.innerHTML = '<i class="fas fa-check-circle" style="color: #28a745;"></i> OCR引擎已加载（需要网络连接）';
+                    ocrStatusText.innerHTML = '✅ OCR引擎已加载（需要网络连接）';
                 }
             } else {
-                ocrStatusText.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #ffc107;"></i> OCR引擎未加载，请检查网络连接';
+                ocrStatusText.innerHTML = '⚠️ OCR引擎未加载，请检查网络连接';
             }
         } catch (error) {
             console.error('OCR状态检查失败:', error);
-            ocrStatusText.innerHTML = '<i class="fas fa-times-circle" style="color: #dc3545;"></i> OCR引擎检查失败，请刷新页面';
+            ocrStatusText.innerHTML = '❌ OCR引擎检查失败，请刷新页面';
         }
     }
     
@@ -686,7 +711,7 @@ function initOCR() {
         }
         
         extractBtn.disabled = false;
-        extractBtn.innerHTML = '<i class="fas fa-magic"></i> 提取文字';
+        extractBtn.innerHTML = '✨ 提取文字';
     }
     
     // OCR文本无空格清理函数
@@ -890,11 +915,11 @@ function renderTasks() {
                 <div class="task-actions">
                     <button class="btn ${task.completed ? 'secondary' : 'primary'}" 
                             onclick="toggleTask(${task.id})">
-                        <i class="fas fa-${task.completed ? 'undo' : 'check'}"></i>
+                        ${task.completed ? '↩️' : '✅'}
                         ${task.completed ? '取消完成' : '标记完成'}
                     </button>
                     <button class="btn secondary" onclick="deleteTask(${task.id})">
-                        <i class="fas fa-trash"></i> 删除
+                        🗑️ 删除
                     </button>
                 </div>
             </div>
@@ -1145,7 +1170,7 @@ function renderNotesList() {
     if (filteredNotes.length === 0) {
         notesList.innerHTML = `
             <div class="empty-notes">
-                <i class="fas fa-sticky-note"></i>
+                📝
                 <p>${searchQuery ? '没有找到匹配的笔记' : '暂无笔记<br>点击"新建笔记"开始'}</p>
             </div>
         `;
@@ -1284,7 +1309,7 @@ function renderBookmarks() {
         <a href="${bookmark.url}" target="_blank" class="bookmark-item" 
            style="background: ${bookmark.color};">
             <button class="bookmark-delete" onclick="event.preventDefault(); deleteBookmark(${bookmark.id})">
-                <i class="fas fa-times"></i>
+                ✖️
             </button>
             <div>${bookmark.name}</div>
         </a>
@@ -1297,6 +1322,7 @@ function saveData() {
     const notepad2 = document.getElementById('notepad2');
     
     const data = {
+        version: '3.0', // 添加版本标识
         tasks,
         bookmarks,
         currentSort,
@@ -1314,6 +1340,23 @@ function saveData() {
 function loadData() {
     try {
         const data = JSON.parse(localStorage.getItem('toolbox-data') || '{}');
+        
+        // 检查数据版本，清理旧版本的布局配置
+        if (!data.version || data.version !== '3.0') {
+            console.log('检测到旧版本配置数据，清理布局设置...');
+            localStorage.removeItem('layout-order'); // 清除旧的布局配置
+            showNotification('已更新为v3.0响应式布局系统，布局配置已重置', 'info');
+            
+            // 在控制台显示帮助信息
+            console.group('📱 布局系统升级说明');
+            console.log('✅ 已升级到v3.0响应式布局系统');
+            console.log('🔧 如果布局仍有问题，可以使用以下控制台命令：');
+            console.log('   showUserData() - 查看当前配置数据');
+            console.log('   clearLayout() - 清除布局配置');
+            console.log('   clearUserData() - 清除所有数据（慎用）');
+            console.log('⌨️  快捷键: Ctrl+Shift+R - 重置所有配置');
+            console.groupEnd();
+        }
         
         if (data.tasks) {
             tasks = data.tasks.map(task => ({
@@ -1354,7 +1397,7 @@ function loadData() {
             notepadCompareMode = true;
             notepad2Section.style.display = 'flex';
             notepadArea.classList.add('compare-mode');
-            compareModeBtn.innerHTML = '<i class="fas fa-columns"></i> 单栏模式';
+            compareModeBtn.innerHTML = '📖 单栏模式';
         }
         
         // 恢复笔记本数据
@@ -1386,9 +1429,12 @@ function loadData() {
         renderBookmarks();
         renderNotesList();
         
-        // 恢复布局顺序
+        // 恢复布局顺序（仅在大屏幕上，避免干扰响应式设计）
         setTimeout(() => {
-            restoreLayoutOrder();
+            // 只在大屏幕(>1024px)上恢复自定义布局顺序
+            if (window.innerWidth > 1024) {
+                restoreLayoutOrder();
+            }
         }, 200);
         
     } catch (error) {
@@ -1443,10 +1489,320 @@ document.addEventListener('keydown', (e) => {
             showNotification('快速添加任务模式', 'info');
         }
     }
+    
+    // Ctrl/Cmd + Shift + R 重置所有配置
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+        e.preventDefault();
+        if (confirm('确定要重置所有配置吗？这将清除所有任务、笔记、布局设置等数据！')) {
+            clearAllUserData();
+        }
+    }
 });
+
+// 清除所有用户数据的函数
+function clearAllUserData() {
+    try {
+        // 清除localStorage中的所有项目数据
+        localStorage.removeItem('toolbox-data');
+        localStorage.removeItem('layout-order');
+        
+        // 重置全局变量
+        tasks = [];
+        bookmarks = [];
+        currentSort = 'deadline';
+        notepadCompareMode = false;
+        notes = [];
+        currentNote = null;
+        nextNoteId = 1;
+        searchQuery = '';
+        
+        // 刷新页面重新初始化
+        location.reload();
+        
+    } catch (error) {
+        console.error('清除数据失败:', error);
+        showNotification('清除数据失败，请刷新页面重试', 'error');
+    }
+}
+
+// 在控制台提供清理和调试函数
+window.clearUserData = clearAllUserData;
+
+// 调试函数：查看当前配置数据
+window.showUserData = function() {
+    const toolboxData = localStorage.getItem('toolbox-data');
+    const layoutOrder = localStorage.getItem('layout-order');
+    
+    console.group('💾 用户配置数据');
+    console.log('版本信息:', toolboxData ? JSON.parse(toolboxData).version || '旧版本' : '无数据');
+    console.log('配置数据大小:', toolboxData ? (toolboxData.length / 1024).toFixed(2) + 'KB' : '0KB');
+    console.log('布局配置:', layoutOrder ? JSON.parse(layoutOrder) : '无布局配置');
+    console.log('完整数据:', {
+        toolboxData: toolboxData ? JSON.parse(toolboxData) : null,
+        layoutOrder: layoutOrder ? JSON.parse(layoutOrder) : null
+    });
+    console.groupEnd();
+};
+
+// 调试函数：仅清除布局配置
+window.clearLayout = function() {
+    localStorage.removeItem('layout-order');
+    console.log('✅ 布局配置已清除，请刷新页面查看效果');
+    showNotification('布局配置已清除', 'success');
+};
 
 // 定期保存数据（防止意外丢失）
 setInterval(saveData, 30000); // 每30秒自动保存一次
 
 // 页面卸载前保存数据
-window.addEventListener('beforeunload', saveData); 
+window.addEventListener('beforeunload', saveData);
+
+// ===== 设置功能实现 =====
+
+// 初始化设置功能
+function initSettings() {
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    const exportConfigBtn = document.getElementById('export-config-btn');
+    const importConfigBtn = document.getElementById('import-config-btn');
+    const importConfigInput = document.getElementById('import-config-input');
+    const resetAllBtn = document.getElementById('reset-all-btn');
+
+    // 打开设置模态框
+    settingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'block';
+        updateSystemInfo();
+    });
+
+    // 关闭设置模态框
+    closeSettingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+
+    // 点击背景关闭模态框
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+            settingsModal.style.display = 'none';
+        }
+    });
+
+    // 导出配置
+    exportConfigBtn.addEventListener('click', exportConfiguration);
+
+    // 导入配置
+    importConfigBtn.addEventListener('click', () => {
+        importConfigInput.click();
+    });
+
+    importConfigInput.addEventListener('change', handleImportConfiguration);
+
+    // 重置所有数据
+    resetAllBtn.addEventListener('click', () => {
+        if (confirm('⚠️ 警告：此操作将清除所有数据，包括任务、书签、笔记等，且无法恢复！\n\n确定要继续吗？')) {
+            if (confirm('🔴 最后确认：真的要删除所有数据吗？建议先导出备份！')) {
+                clearAllUserData();
+            }
+        }
+    });
+}
+
+// 导出配置文件
+function exportConfiguration() {
+    try {
+        const toolboxData = localStorage.getItem('toolbox-data');
+        const layoutOrder = localStorage.getItem('layout-order');
+        
+        const exportData = {
+            exportInfo: {
+                version: '3.0',
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                url: window.location.href
+            },
+            toolboxData: toolboxData ? JSON.parse(toolboxData) : null,
+            layoutOrder: layoutOrder ? JSON.parse(layoutOrder) : null
+        };
+
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'text/plain;charset=utf-8' });
+        
+        const link = document.createElement('a');
+        const fileName = `百宝箱配置备份_${new Date().toISOString().split('T')[0]}.txt`;
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = fileName;
+        link.click();
+        
+        URL.revokeObjectURL(link.href);
+        showNotification('配置文件导出成功！', 'success');
+        
+        // 在控制台显示导出信息
+        console.group('📁 配置导出成功');
+        console.log('文件名:', fileName);
+        console.log('数据大小:', (dataStr.length / 1024).toFixed(2) + 'KB');
+        console.log('包含数据:', Object.keys(exportData));
+        console.groupEnd();
+        
+    } catch (error) {
+        console.error('导出配置失败:', error);
+        showNotification('配置导出失败：' + error.message, 'error');
+    }
+}
+
+// 处理导入配置
+function handleImportConfiguration(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.txt')) {
+        showNotification('请选择.txt格式的配置文件', 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const configData = JSON.parse(e.target.result);
+            importConfiguration(configData);
+        } catch (error) {
+            console.error('解析配置文件失败:', error);
+            showNotification('配置文件格式错误，无法导入', 'error');
+        }
+    };
+
+    reader.onerror = function() {
+        showNotification('读取文件失败', 'error');
+    };
+
+    reader.readAsText(file, 'utf-8');
+    
+    // 重置input值，允许重复选择同一文件
+    event.target.value = '';
+}
+
+// 导入配置数据
+function importConfiguration(configData) {
+    try {
+        // 验证配置数据格式
+        if (!configData || typeof configData !== 'object') {
+            throw new Error('配置数据格式无效');
+        }
+
+        // 验证是否是有效的导出文件
+        if (!configData.exportInfo || !configData.toolboxData) {
+            throw new Error('这不是有效的百宝箱配置文件');
+        }
+
+        const confirmMessage = `
+📂 配置导入确认
+
+文件信息：
+• 导出时间：${new Date(configData.exportInfo.timestamp).toLocaleString()}
+• 版本：${configData.exportInfo.version}
+• 任务数量：${configData.toolboxData.tasks?.length || 0}
+• 笔记数量：${configData.toolboxData.notes?.length || 0}
+• 书签数量：${configData.toolboxData.bookmarks?.length || 0}
+
+⚠️ 导入将覆盖当前所有数据，是否继续？
+        `;
+
+        if (!confirm(confirmMessage.trim())) {
+            return;
+        }
+
+        // 备份当前数据
+        const currentData = {
+            toolboxData: localStorage.getItem('toolbox-data'),
+            layoutOrder: localStorage.getItem('layout-order')
+        };
+
+        try {
+            // 导入配置数据
+            if (configData.toolboxData) {
+                localStorage.setItem('toolbox-data', JSON.stringify(configData.toolboxData));
+            }
+
+            if (configData.layoutOrder) {
+                localStorage.setItem('layout-order', JSON.stringify(configData.layoutOrder));
+            }
+
+            showNotification('配置导入成功！页面将刷新...', 'success');
+
+            // 延迟刷新，让用户看到成功消息
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+
+            // 在控制台显示导入信息
+            console.group('📥 配置导入成功');
+            console.log('导入时间:', new Date().toISOString());
+            console.log('原文件信息:', configData.exportInfo);
+            console.log('导入的数据项:', Object.keys(configData));
+            console.groupEnd();
+
+        } catch (importError) {
+            // 恢复备份数据
+            if (currentData.toolboxData) {
+                localStorage.setItem('toolbox-data', currentData.toolboxData);
+            }
+            if (currentData.layoutOrder) {
+                localStorage.setItem('layout-order', currentData.layoutOrder);
+            }
+            throw importError;
+        }
+
+    } catch (error) {
+        console.error('导入配置失败:', error);
+        showNotification('导入失败：' + error.message, 'error');
+    }
+}
+
+// 更新系统信息显示
+function updateSystemInfo() {
+    try {
+        const toolboxData = localStorage.getItem('toolbox-data');
+        const layoutData = localStorage.getItem('layout-order');
+        
+        let dataSize = 0;
+        let tasksCount = 0;
+        let notesCount = 0;
+        
+        if (toolboxData) {
+            dataSize += toolboxData.length;
+            const data = JSON.parse(toolboxData);
+            tasksCount = data.tasks?.length || 0;
+            notesCount = data.notes?.length || 0;
+        }
+        
+        if (layoutData) {
+            dataSize += layoutData.length;
+        }
+        
+        document.getElementById('data-size-info').textContent = (dataSize / 1024).toFixed(2) + ' KB';
+        document.getElementById('tasks-count-info').textContent = tasksCount;
+        document.getElementById('notes-count-info').textContent = notesCount;
+        
+    } catch (error) {
+        console.error('更新系统信息失败:', error);
+    }
+}
+
+// 窗口大小改变时处理布局
+window.addEventListener('resize', () => {
+    // 防抖处理，避免频繁触发
+    clearTimeout(window.resizeTimeout);
+    window.resizeTimeout = setTimeout(() => {
+        const functionsGrid = document.querySelector('.functions-grid');
+        if (functionsGrid) {
+            // 如果从小屏幕切换到大屏幕，恢复自定义布局
+            if (window.innerWidth > 1024) {
+                restoreLayoutOrder();
+            }
+            // 如果从大屏幕切换到小屏幕，清除可能的干扰样式
+            else {
+                // 确保响应式布局正常工作
+                functionsGrid.style.order = '';
+            }
+        }
+    }, 250);
+}); 
