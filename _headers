@@ -1,0 +1,25 @@
+# Cloudflare Pages HTTP Headers 配置
+/*
+  # 安全头部
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  
+  # 缓存控制
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML文件缓存设置
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# CSS文件缓存
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# JavaScript文件缓存
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+
+# 字体文件缓存
+/libs/*
+  Cache-Control: public, max-age=31536000, immutable 

@@ -2,7 +2,7 @@
 
 一个现代化的多功能工作助手网站，整合了**在线OCR识别**和多种实用工具，提供高效的工作体验！
 
-![](https://img.shields.io/badge/版本-v3.0-brightgreen) ![](https://img.shields.io/badge/OCR引擎-在线CDN-blue) ![](https://img.shields.io/badge/体积-轻量化-success) ![](https://img.shields.io/badge/大小-<1MB-orange)
+![](https://img.shields.io/badge/版本-v3.0-brightgreen) ![](https://img.shields.io/badge/OCR引擎-在线CDN-blue) ![](https://img.shields.io/badge/体积-轻量化-success) ![](https://img.shields.io/badge/大小-<1MB-orange) ![](https://img.shields.io/badge/部署-Cloudflare_Pages-ff6900)
 
 ## ✨ 主要特色
 
@@ -142,6 +142,34 @@ npx http-server -p 8000 --cors
 | 项目大小 | 小 | 28MB | ✅ <1MB |
 | 部署便利 | 一般 | 需下载大文件 | ✅ 轻量部署 |
 | 网络要求 | 需要 | 不需要 | OCR需要 |
+
+## 🚀 快速部署
+
+### Cloudflare Pages 部署（推荐）
+
+项目已针对 Cloudflare Pages 优化，支持一键部署：
+
+```bash
+# 1. 克隆或下载项目
+git clone <your-repo-url>
+cd lenns-tool
+
+# 2. 推送到GitHub（如果还没有）
+git add .
+git commit -m "Ready for deployment"
+git push origin main
+```
+
+然后在 [Cloudflare Pages](https://pages.cloudflare.com) 中连接GitHub仓库即可自动部署。
+
+### 📋 部署优势
+- 🆓 **完全免费**：无限带宽，全球CDN
+- ⚡ **极速访问**：200+全球节点加速
+- 🔒 **安全稳定**：免费SSL，DDoS防护  
+- 🔄 **自动更新**：代码推送自动部署
+
+### 📖 详细说明
+请查看 `部署指南.md` 获取完整的部署步骤和配置说明。
 
 ## 🤝 贡献
 

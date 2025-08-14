@@ -1,0 +1,25 @@
+# 系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 开发服务器文件（仅用于本地开发）
+启动服务器.bat
+启动服务器.js
+启动服务器.py
+
+# 编辑器文件
+*.swp
+*.swo
+*~
+
+# 日志文件
+*.log
+
+# 临时文件
+tmp/
+temp/ 
