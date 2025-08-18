@@ -3,6 +3,7 @@ let tasks = [];
 let bookmarks = [];
 let currentSort = 'deadline';
 let notepadCompareMode = false;
+let isSimpleMode = false; // 简单模式状态标记
 
 // 笔记本相关变量
 let notes = [];
@@ -814,8 +815,105 @@ function initTasks() {
     const taskForm = document.getElementById('task-form');
     const sortBtns = document.querySelectorAll('.sort-btn');
     const quickAddBtn = document.getElementById('quick-add-task-btn');
+    const simpleModeBtn = document.getElementById('simple-mode-btn');
+    const sortingOptions = document.querySelector('.sorting-options');
+
+    // 从本地存储加载简单模式状态
+    isSimpleMode = localStorage.getItem('isSimpleMode') === 'true';
+    updateSimpleModeUI();
 
     taskForm.addEventListener('submit', addTask);
+
+    // 简单模式按钮功能
+    simpleModeBtn.addEventListener('click', () => {
+        isSimpleMode = !isSimpleMode;
+        localStorage.setItem('isSimpleMode', isSimpleMode);
+
+        // 添加动画效果
+        const taskForm = document.getElementById('task-form');
+        if (taskForm) {
+            taskForm.classList.add('mode-transition');
+            setTimeout(() => {
+                updateSimpleModeUI();
+                setTimeout(() => {
+                    taskForm.classList.remove('mode-transition');
+                }, 300);
+            }, 50);
+        } else {
+            updateSimpleModeUI();
+        }
+
+        // 显示通知
+        const modeText = isSimpleMode ? '简单模式' : '完整模式';
+        showNotification(`已切换到${modeText}`, 'info');
+    });
+
+    // 更新简单模式UI状态
+    function updateSimpleModeUI() {
+        // 更新按钮样式
+        simpleModeBtn.classList.toggle('active', isSimpleMode);
+
+        // 更新表单样式类
+        const taskForm = document.getElementById('task-form');
+        if (taskForm) {
+            if (isSimpleMode) {
+                taskForm.classList.add('simple-mode-form');
+            } else {
+                taskForm.classList.remove('simple-mode-form');
+            }
+        }
+
+        // 更新排序选项显示状态
+        sortingOptions.style.display = isSimpleMode ? 'none' : 'flex';
+
+        // 获取所有需要控制的元素
+        const taskDeadline = document.getElementById('task-deadline');
+        const simpleModeHint = document.querySelector('.simple-mode-hint');
+        const difficultyGroup = document.getElementById('difficulty-group');
+        const implementationGroup = document.getElementById('implementation-group');
+        const simpleModeMessage = document.getElementById('simple-mode-message');
+
+        if (isSimpleMode) {
+            // 简单模式下的UI - 干净整洁
+
+            // 隐藏难度和实现难度选择器
+            if (difficultyGroup) difficultyGroup.style.display = 'none';
+            if (implementationGroup) implementationGroup.style.display = 'none';
+
+            // 隐藏日期字段组，并设置为不必填
+            const deadlineGroup = document.getElementById('deadline-group');
+            if (deadlineGroup) deadlineGroup.style.display = 'none';
+
+            if (taskDeadline) {
+                taskDeadline.removeAttribute('required');
+                taskDeadline.disabled = true;
+            }
+
+            // 不显示提示信息，保持界面干净
+            if (simpleModeHint) simpleModeHint.style.display = 'none';
+            if (simpleModeMessage) simpleModeMessage.style.display = 'none';
+
+        } else {
+            // 完整模式下的UI
+
+            // 显示所有字段
+            if (difficultyGroup) difficultyGroup.style.display = 'block';
+            if (implementationGroup) implementationGroup.style.display = 'block';
+
+            // 显示日期字段组，并设置为必填
+            const deadlineGroup = document.getElementById('deadline-group');
+            if (deadlineGroup) deadlineGroup.style.display = 'block';
+
+            if (taskDeadline) {
+                taskDeadline.setAttribute('required', '');
+                taskDeadline.disabled = false;
+            }
+
+            // 隐藏提示信息
+            if (simpleModeHint) simpleModeHint.style.display = 'none';
+            if (simpleModeMessage) simpleModeMessage.style.display = 'none';
+        }
+    }
 
     // 快速添加按钮功能 - 显示/隐藏任务添加表单
     quickAddBtn.addEventListener('click', () => {
@@ -839,6 +937,9 @@ function initTasks() {
                 // 聚焦到任务名称输入框
                 const taskNameInput = document.getElementById('task-name');
                 taskNameInput.focus();
+
+                // 更新简单模式UI（确保日期字段状态正确）
+                updateSimpleModeUI();
             }, 10);
 
             // 更改按钮图标为减号
@@ -873,15 +974,34 @@ function initTasks() {
         e.preventDefault();
 
         const name = document.getElementById('task-name').value;
-        const difficulty = parseInt(document.getElementById('task-difficulty').value);
-        const deadline = document.getElementById('task-deadline').value;
-        const implementation = parseInt(document.getElementById('task-implementation').value);
+        let difficulty, implementation, deadline;
+
+        // 简单模式下使用默认值
+        if (isSimpleMode) {
+            // 简单模式下默认难度和实现难度都设为中等(2)
+            difficulty = 2;
+            implementation = 2;
+
+            // 自动设置截止日期为明天
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(18, 0, 0, 0); // 设置为明天下午6点
+            deadline = tomorrow;
+        } else {
+            // 完整模式下使用用户选择的值
+            difficulty = parseInt(document.getElementById('task-difficulty').value);
+            implementation = parseInt(document.getElementById('task-implementation').value);
+
+            // 使用用户选择的日期
+            const deadlineInput = document.getElementById('task-deadline').value;
+            deadline = new Date(deadlineInput);
+        }
 
         const task = {
             id: Date.now(),
             name,
             difficulty,
-            deadline: new Date(deadline),
+            deadline: deadline,
             implementation,
             completed: false,
             createdAt: new Date()
@@ -891,7 +1011,13 @@ function initTasks() {
         saveData();
         renderTasks();
         taskForm.reset();
-        showNotification('任务已添加', 'success');
+
+        // 在简单模式下显示特殊提示
+        if (isSimpleMode) {
+            showNotification('任务已添加（简单模式：截止时间设为明天下午6点）', 'success');
+        } else {
+            showNotification('任务已添加', 'success');
+        }
     }
 
     window.toggleTask = function (id) {

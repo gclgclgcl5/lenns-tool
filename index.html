@@ -138,9 +138,14 @@
                 <div class="card tasks-card">
                     <div class="tasks-header">
                         <h2>✅ 工作清单管理</h2>
-                        <button id="quick-add-task-btn" class="quick-add-btn" title="快速添加任务">
-                            ➕
-                        </button>
+                        <div class="task-buttons">
+                            <button id="simple-mode-btn" class="simple-btn" title="切换简单模式">
+                                简单
+                            </button>
+                            <button id="quick-add-task-btn" class="quick-add-btn" title="快速添加任务">
+                                ➕
+                            </button>
+                        </div>
                     </div>
                     <div class="tasks-container">
                         <div class="add-task-section" id="add-task-section" style="display: none;">
@@ -150,7 +155,7 @@
                                     <input type="text" id="task-name" placeholder="任务名称" required>
                                 </div>
                                 <div class="form-row">
-                                    <div class="form-group">
+                                    <div class="form-group" id="difficulty-group">
                                         <select id="task-difficulty">
                                             <option value="1">简单</option>
                                             <option value="2">中等</option>
@@ -158,16 +163,24 @@
                                             <option value="4">极难</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group" id="deadline-group">
                                         <input type="datetime-local" id="task-deadline" required>
+                                        <small class="simple-mode-hint" style="display: none;">简单模式下自动设为明天</small>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group" id="implementation-group">
                                         <select id="task-implementation">
                                             <option value="1">容易实现</option>
                                             <option value="2">需要研究</option>
                                             <option value="3">技术挑战</option>
                                             <option value="4">创新突破</option>
                                         </select>
+                                    </div>
+                                </div>
+                                <div id="simple-mode-message" class="simple-mode-message" style="display: none;">
+                                    <div class="simple-mode-icon">✨</div>
+                                    <div class="simple-mode-text">
+                                        <span>简单模式已开启</span>
+                                        <small>任务将自动设置为中等难度，截止时间为明天</small>
                                     </div>
                                 </div>
                                 <button type="submit" class="btn primary">
