@@ -11,7 +11,7 @@ let nextNoteId = 1;
 let searchQuery = '';
 
 // DOM加载完成后初始化
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initTranslator();
     initOCR();
     initTasks();
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initNotebook();
     initSettings(); // 初始化设置功能
     loadData();
-    
+
     // 确保DOM完全加载后再初始化拖拽
     setTimeout(() => {
         initDragAndDrop();
@@ -35,11 +35,11 @@ function initNotepad() {
     const notepad2 = document.getElementById('notepad2');
     const notepad2Section = document.getElementById('notepad2-section');
     const notepadArea = document.querySelector('.notepad-area');
-    
+
     // 对比模式切换
     compareModeBtn.addEventListener('click', () => {
         notepadCompareMode = !notepadCompareMode;
-        
+
         if (notepadCompareMode) {
             notepad2Section.style.display = 'flex';
             notepadArea.classList.add('compare-mode');
@@ -51,10 +51,10 @@ function initNotepad() {
             compareModeBtn.innerHTML = '📖 对比模式';
             showNotification('已关闭对比模式', 'info');
         }
-        
+
         saveData();
     });
-    
+
     // 清空记事本
     clearNotesBtn.addEventListener('click', () => {
         if (confirm('确定要清空记事本内容吗？')) {
@@ -64,20 +64,20 @@ function initNotepad() {
             showNotification('记事本已清空', 'success');
         }
     });
-    
+
     // 自动保存记事本内容
     notepad1.addEventListener('input', () => {
         saveData();
     });
-    
+
     notepad2.addEventListener('input', () => {
         saveData();
     });
-    
+
     // 记事本键盘快捷键
     notepad1.addEventListener('keydown', handleNotepadShortcuts);
     notepad2.addEventListener('keydown', handleNotepadShortcuts);
-    
+
     function handleNotepadShortcuts(e) {
         // Ctrl+S 保存（实际上已经自动保存，这里只是给用户反馈）
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -85,7 +85,7 @@ function initNotepad() {
             saveData();
             showNotification('记事本内容已保存', 'success');
         }
-        
+
         // Ctrl+A 全选
         if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
             e.target.select();
@@ -100,75 +100,75 @@ function initDragAndDrop() {
     const functionAreas = document.querySelectorAll('.function-area');
     let draggedElement = null;
     let draggedIndex = -1;
-    
+
     functionAreas.forEach((area, index) => {
         area.draggable = true;
-        
+
         area.addEventListener('dragstart', (e) => {
             draggedElement = area;
             draggedIndex = Array.from(functionsGrid.children).indexOf(area);
             area.classList.add('dragging');
-            
+
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', index.toString());
-            
+
             // 添加视觉反馈
             setTimeout(() => {
                 area.style.opacity = '0.5';
             }, 0);
         });
-        
+
         area.addEventListener('dragend', (e) => {
             area.classList.remove('dragging');
             area.style.opacity = '1';
             draggedElement = null;
             draggedIndex = -1;
-            
+
             // 移除所有拖拽相关的样式
             functionAreas.forEach(el => {
                 el.classList.remove('drag-over');
             });
         });
-        
+
         area.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            
+
             if (draggedElement && draggedElement !== area) {
                 area.classList.add('drag-over');
             }
         });
-        
+
         area.addEventListener('dragleave', (e) => {
             area.classList.remove('drag-over');
         });
-        
+
         area.addEventListener('drop', (e) => {
             e.preventDefault();
             area.classList.remove('drag-over');
-            
+
             if (draggedElement && draggedElement !== area) {
                 const targetIndex = Array.from(functionsGrid.children).indexOf(area);
-                
+
                 // 简单的位置交换
                 if (draggedIndex !== -1 && targetIndex !== -1) {
                     // 获取所有子元素
                     const allAreas = Array.from(functionsGrid.children);
-                    
+
                     // 交换位置
                     if (draggedIndex < targetIndex) {
                         functionsGrid.insertBefore(draggedElement, area.nextSibling);
                     } else {
                         functionsGrid.insertBefore(draggedElement, area);
                     }
-                    
+
                     saveLayoutOrder();
                     showNotification('功能区域位置已调整', 'success');
                 }
             }
         });
     });
-    
+
     // 双击重置布局 - 监听整个网格区域（仅在大屏幕上有效）
     functionsGrid.addEventListener('dblclick', (e) => {
         // 检查是否点击在功能区域之外，且在大屏幕上
@@ -196,28 +196,28 @@ function restoreLayoutOrder() {
     try {
         const savedOrder = JSON.parse(localStorage.getItem('layout-order') || '[]');
         if (savedOrder.length === 0) return;
-        
+
         // 验证布局数据的完整性
         const expectedAreas = [
-            'translator-area', 'notepad-area', 'ocr-area', 
+            'translator-area', 'notepad-area', 'ocr-area',
             'tasks-area', 'bookmarks-area', 'notebook-area'
         ];
-        
+
         const functionsGrid = document.querySelector('.functions-grid');
         const areas = Array.from(functionsGrid.children);
-        
+
         // 检查保存的布局是否包含所有必要的区域
-        const isValidLayout = expectedAreas.every(areaClass => 
-            savedOrder.includes(areaClass) && 
+        const isValidLayout = expectedAreas.every(areaClass =>
+            savedOrder.includes(areaClass) &&
             areas.some(el => el.classList.contains(areaClass))
         );
-        
+
         if (!isValidLayout) {
             console.log('布局数据不完整，清除旧配置');
             localStorage.removeItem('layout-order');
             return;
         }
-        
+
         // 按保存的顺序重新排列
         savedOrder.forEach((areaClass) => {
             const area = areas.find(el => el.classList.contains(areaClass));
@@ -237,20 +237,20 @@ function resetLayout() {
     const functionsGrid = document.querySelector('.functions-grid');
     const defaultOrder = [
         'translator-area',
-        'notepad-area', 
+        'notepad-area',
         'ocr-area',
         'tasks-area',
         'bookmarks-area',
         'notebook-area'
     ];
-    
+
     defaultOrder.forEach(areaClass => {
         const area = document.querySelector(`.${areaClass}`);
         if (area) {
             functionsGrid.appendChild(area);
         }
     });
-    
+
     localStorage.removeItem('layout-order');
 }
 
@@ -262,10 +262,10 @@ function initTranslator() {
     const targetText = document.getElementById('target-text');
     const sourceLang = document.getElementById('source-lang');
     const targetLang = document.getElementById('target-lang');
-    
+
     translateBtn.addEventListener('click', translateText);
     swapBtn.addEventListener('click', swapLanguages);
-    
+
     // 实时翻译（防抖）
     let translateTimeout;
     sourceText.addEventListener('input', () => {
@@ -276,29 +276,29 @@ function initTranslator() {
             }
         }, 1000);
     });
-    
+
     async function translateText() {
         const text = sourceText.value.trim();
         if (!text) {
             showNotification('请输入要翻译的文字', 'error');
             return;
         }
-        
+
         const from = sourceLang.value;
         const to = targetLang.value;
-        
+
         if (from === to && from !== 'auto') {
             showNotification('源语言和目标语言不能相同', 'error');
             return;
         }
-        
+
         translateBtn.disabled = true;
         translateBtn.innerHTML = '<div class="loading"></div> 翻译中...';
-        
+
         try {
             // 尝试多个翻译API
             let translatedText = await tryMultipleTranslationAPIs(text, from, to);
-            
+
             if (translatedText) {
                 targetText.value = translatedText;
                 showNotification('翻译完成', 'success');
@@ -312,11 +312,11 @@ function initTranslator() {
             targetText.value = localTranslation;
             showNotification('网络翻译不可用，使用了本地词典', 'info');
         }
-        
+
         translateBtn.disabled = false;
         translateBtn.innerHTML = '🔄 翻译';
     }
-    
+
     async function tryMultipleTranslationAPIs(text, from, to) {
         const APIs = [
             // Google Translate (通过代理)
@@ -335,7 +335,7 @@ function initTranslator() {
             async () => {
                 const response = await fetch('https://libretranslate.de/translate', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         q: text,
                         source: from === 'auto' ? 'en' : from,
@@ -347,7 +347,7 @@ function initTranslator() {
                 return data.translatedText;
             }
         ];
-        
+
         for (const api of APIs) {
             try {
                 const result = await Promise.race([
@@ -364,7 +364,7 @@ function initTranslator() {
         }
         return null;
     }
-    
+
     function getLocalTranslation(text, from, to) {
         // 本地词典翻译
         const translations = {
@@ -413,36 +413,36 @@ function initTranslator() {
                 'company': '公司'
             }
         };
-        
+
         const langPair = `${from}-${to}`;
         const dict = translations[langPair] || {};
         const lowerText = text.toLowerCase();
-        
+
         // 查找完全匹配
         if (dict[lowerText]) {
             return dict[lowerText];
         }
-        
+
         // 查找部分匹配
         for (const [key, value] of Object.entries(dict)) {
             if (lowerText.includes(key) || key.includes(lowerText)) {
                 return `${value} (部分匹配)`;
             }
         }
-        
+
         // 如果没有找到匹配，返回带标记的原文
         return `[${to.toUpperCase()}] ${text}`;
     }
-    
+
     function swapLanguages() {
         if (sourceLang.value === 'auto') {
             showNotification('自动检测模式下无法交换语言', 'error');
             return;
         }
-        
+
         const tempLang = sourceLang.value;
         const tempText = sourceText.value;
-        
+
         sourceLang.value = targetLang.value;
         targetLang.value = tempLang;
         sourceText.value = targetText.value;
@@ -457,10 +457,10 @@ function checkTesseractLoaded() {
             resolve(true);
             return;
         }
-        
+
         let attempts = 0;
         const maxAttempts = 20; // 最多等待10秒
-        
+
         const checkInterval = setInterval(() => {
             attempts++;
             if (typeof Tesseract !== 'undefined') {
@@ -484,20 +484,20 @@ function initOCR() {
     const extractBtn = document.getElementById('extract-text-btn');
     const extractedText = document.getElementById('extracted-text');
     const copyBtn = document.getElementById('copy-text-btn');
-    
+
     // 文件上传
     imageInput.addEventListener('change', handleImageSelect);
-    
+
     // 拖拽上传
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.classList.add('dragover');
     });
-    
+
     dropZone.addEventListener('dragleave', () => {
         dropZone.classList.remove('dragover');
     });
-    
+
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
         dropZone.classList.remove('dragover');
@@ -506,7 +506,7 @@ function initOCR() {
             handleImageFile(files[0]);
         }
     });
-    
+
     // 粘贴图片
     pasteBtn.addEventListener('click', async () => {
         try {
@@ -526,36 +526,36 @@ function initOCR() {
             showNotification('无法访问剪贴板，请手动上传图片', 'error');
         }
     });
-    
+
     // 提取文字
     extractBtn.addEventListener('click', extractTextFromImage);
-    
+
     // 复制文字
     copyBtn.addEventListener('click', () => {
         extractedText.select();
         document.execCommand('copy');
         showNotification('文字已复制到剪贴板', 'success');
     });
-    
+
     // 初始化OCR状态检查
     checkOCRStatus();
-    
+
     async function checkOCRStatus() {
         const ocrStatusText = document.getElementById('ocr-status-text');
         if (!ocrStatusText) return;
-        
+
         ocrStatusText.innerHTML = '⏳ 检查OCR引擎状态...';
-        
+
         try {
             const isLoaded = await checkTesseractLoaded();
             if (isLoaded) {
                 ocrStatusText.innerHTML = '✅ OCR引擎已就绪';
-                
+
                 // 尝试预加载worker以确保真正可用
                 try {
                     ocrStatusText.innerHTML = '⏳ 预热OCR引擎...';
                     const testWorker = await Tesseract.createWorker({
-                        logger: () => {} // 静默日志
+                        logger: () => { } // 静默日志
                     });
                     await testWorker.terminate();
                     ocrStatusText.innerHTML = '✅ OCR引擎预热完成，可以使用';
@@ -571,20 +571,20 @@ function initOCR() {
             ocrStatusText.innerHTML = '❌ OCR引擎检查失败，请刷新页面';
         }
     }
-    
+
     function handleImageSelect(e) {
         const file = e.target.files[0];
         if (file) {
             handleImageFile(file);
         }
     }
-    
+
     function handleImageFile(file) {
         if (!file.type.startsWith('image/')) {
             showNotification('请选择图片文件', 'error');
             return;
         }
-        
+
         const reader = new FileReader();
         reader.onload = (e) => {
             previewImage.src = e.target.result;
@@ -594,76 +594,76 @@ function initOCR() {
         };
         reader.readAsDataURL(file);
     }
-    
+
     async function extractTextFromImage() {
         if (!previewImage.src) {
             showNotification('请先上传图片', 'error');
             return;
         }
-        
+
         extractBtn.disabled = true;
         extractBtn.innerHTML = '<div class="loading"></div> 识别中...';
-        
+
         try {
             // 检查Tesseract是否可用
             const tesseractLoaded = await checkTesseractLoaded();
             if (!tesseractLoaded) {
                 throw new Error('OCR库未加载，请检查网络连接');
             }
-            
+
             showNotification('正在初始化文字识别引擎...', 'info');
-            
-                            // 使用简化的Worker创建方式
-                let worker;
-                try {
-                    // 创建worker使用在线CDN资源
-                    worker = await Tesseract.createWorker({
-                        logger: m => {
-                            console.log('Tesseract:', m);
-                            if (m.status === 'loading tesseract core') {
-                                extractBtn.innerHTML = '<div class="loading"></div> 加载核心引擎...';
-                            } else if (m.status === 'initializing tesseract') {
-                                extractBtn.innerHTML = '<div class="loading"></div> 初始化引擎...';
-                            } else if (m.status === 'loading language traineddata') {
-                                extractBtn.innerHTML = '<div class="loading"></div> 加载中文语言包...';
-                            } else if (m.status === 'initializing api') {
-                                extractBtn.innerHTML = '<div class="loading"></div> 准备识别...';
-                            } else if (m.status === 'recognizing text') {
-                                const progress = Math.round(m.progress * 100);
-                                extractBtn.innerHTML = `<div class="loading"></div> 识别文字 ${progress}%`;
-                            }
+
+            // 使用简化的Worker创建方式
+            let worker;
+            try {
+                // 创建worker使用在线CDN资源
+                worker = await Tesseract.createWorker({
+                    logger: m => {
+                        console.log('Tesseract:', m);
+                        if (m.status === 'loading tesseract core') {
+                            extractBtn.innerHTML = '<div class="loading"></div> 加载核心引擎...';
+                        } else if (m.status === 'initializing tesseract') {
+                            extractBtn.innerHTML = '<div class="loading"></div> 初始化引擎...';
+                        } else if (m.status === 'loading language traineddata') {
+                            extractBtn.innerHTML = '<div class="loading"></div> 加载中文语言包...';
+                        } else if (m.status === 'initializing api') {
+                            extractBtn.innerHTML = '<div class="loading"></div> 准备识别...';
+                        } else if (m.status === 'recognizing text') {
+                            const progress = Math.round(m.progress * 100);
+                            extractBtn.innerHTML = `<div class="loading"></div> 识别文字 ${progress}%`;
                         }
-                    });
-                    
-                    // 先加载语言包，再初始化
-                    extractBtn.innerHTML = '<div class="loading"></div> 加载中文语言包...';
-                    await worker.loadLanguage('chi_sim+eng');
-                    
-                    extractBtn.innerHTML = '<div class="loading"></div> 初始化识别引擎...';
-                    await worker.initialize('chi_sim+eng');
-                
+                    }
+                });
+
+                // 先加载语言包，再初始化
+                extractBtn.innerHTML = '<div class="loading"></div> 加载中文语言包...';
+                await worker.loadLanguage('chi_sim+eng');
+
+                extractBtn.innerHTML = '<div class="loading"></div> 初始化识别引擎...';
+                await worker.initialize('chi_sim+eng');
+
             } catch (workerError) {
                 console.error('Worker创建失败:', workerError);
                 throw new Error('文字识别引擎初始化失败，请检查网络连接');
             }
-            
+
             try {
                 extractBtn.innerHTML = '<div class="loading"></div> 开始识别文字...';
-                
+
                 // 设置识别参数
                 const options = {
                     rectangle: { top: 0, left: 0, width: previewImage.naturalWidth, height: previewImage.naturalHeight }
                 };
-                
+
                 const { data: { text, confidence } } = await worker.recognize(previewImage.src, options);
-                
+
                 await worker.terminate();
-                
+
                 // 智能清理识别的文本
                 const cleanText = cleanOCRText(text);
-                
+
                 extractedText.value = cleanText;
-                
+
                 if (cleanText && cleanText.length > 2) {
                     copyBtn.style.display = 'inline-flex';
                     const confidenceText = confidence > 50 ? `(识别准确度: ${Math.round(confidence)}%)` : '';
@@ -683,13 +683,13 @@ function initOCR() {
                 }
                 throw recognizeError;
             }
-            
+
         } catch (error) {
             console.error('OCR错误:', error);
-            
+
             let errorMessage = error.message || '未知错误';
             let errorCategory = 'unknown';
-            
+
             // 分类错误类型
             if (errorMessage.includes('SetImageFile') || errorMessage.includes('Cannot read properties of null')) {
                 errorMessage = '图片处理失败，可能是图片格式不支持';
@@ -704,22 +704,22 @@ function initOCR() {
                 errorMessage = 'OCR库未正确加载';
                 errorCategory = 'library';
             }
-            
+
             // 提供详细的错误信息和解决方案
             provideFallbackSuggestions(errorMessage, errorCategory);
             showNotification(`OCR识别失败: ${errorMessage}`, 'error');
         }
-        
+
         extractBtn.disabled = false;
         extractBtn.innerHTML = '✨ 提取文字';
     }
-    
+
     // OCR文本无空格清理函数
     function cleanOCRText(text) {
         if (!text || typeof text !== 'string') {
             return '';
         }
-        
+
         // 完全移除所有空格和空白字符，只保留换行
         let cleanedText = text
             // 移除所有空格、制表符等空白字符（保留换行符）
@@ -731,17 +731,17 @@ function initOCR() {
             .join('\n')
             // 移除开头和结尾的换行
             .trim();
-        
+
         return cleanedText;
     }
-    
+
     function provideFallbackSuggestions(errorDetail = '', errorCategory = 'unknown') {
         let suggestions = ['❌ OCR文字识别遇到问题'];
-        
+
         if (errorDetail) {
             suggestions.push('', `错误详情: ${errorDetail}`, '');
         }
-        
+
         // 根据错误类型提供针对性建议
         switch (errorCategory) {
             case 'network':
@@ -753,7 +753,7 @@ function initOCR() {
                     '4. 确保可以访问CDN资源'
                 );
                 break;
-                
+
             case 'image':
                 suggestions.push(
                     '📸 图片问题解决方案：',
@@ -763,7 +763,7 @@ function initOCR() {
                     '4. 使用截图工具重新截取图片'
                 );
                 break;
-                
+
             case 'worker':
             case 'library':
                 suggestions.push(
@@ -774,7 +774,7 @@ function initOCR() {
                     '4. 清除浏览器缓存后重试'
                 );
                 break;
-                
+
             default:
                 suggestions.push(
                     '🛠️ 通用解决方案：',
@@ -784,7 +784,7 @@ function initOCR() {
                     '4. 尝试更换网络环境'
                 );
         }
-        
+
         suggestions.push(
             '',
             '📸 图片优化建议：',
@@ -801,11 +801,11 @@ function initOCR() {
             '',
             '💡 您也可以将文字手动输入到上方文本框中。'
         );
-        
+
         extractedText.value = suggestions.join('\n');
         copyBtn.style.display = 'inline-flex';
     }
-    
+
 
 }
 
@@ -813,9 +813,53 @@ function initOCR() {
 function initTasks() {
     const taskForm = document.getElementById('task-form');
     const sortBtns = document.querySelectorAll('.sort-btn');
-    
+    const quickAddBtn = document.getElementById('quick-add-task-btn');
+
     taskForm.addEventListener('submit', addTask);
-    
+
+    // 快速添加按钮功能 - 显示/隐藏任务添加表单
+    quickAddBtn.addEventListener('click', () => {
+        const addTaskSection = document.getElementById('add-task-section');
+        const isHidden = addTaskSection.style.display === 'none';
+
+        // 切换表单显示状态
+        if (isHidden) {
+            // 显示表单
+            addTaskSection.style.display = 'block';
+
+            // 添加动画效果
+            addTaskSection.style.opacity = '0';
+            addTaskSection.style.transform = 'translateY(-20px)';
+
+            setTimeout(() => {
+                addTaskSection.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                addTaskSection.style.opacity = '1';
+                addTaskSection.style.transform = 'translateY(0)';
+
+                // 聚焦到任务名称输入框
+                const taskNameInput = document.getElementById('task-name');
+                taskNameInput.focus();
+            }, 10);
+
+            // 更改按钮图标为减号
+            quickAddBtn.innerHTML = '➖';
+            quickAddBtn.title = '隐藏添加表单';
+        } else {
+            // 隐藏表单
+            addTaskSection.style.opacity = '0';
+            addTaskSection.style.transform = 'translateY(-20px)';
+
+            setTimeout(() => {
+                addTaskSection.style.display = 'none';
+                addTaskSection.style.transition = '';
+            }, 300);
+
+            // 恢复按钮图标为加号
+            quickAddBtn.innerHTML = '➕';
+            quickAddBtn.title = '快速添加任务';
+        }
+    });
+
     sortBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             sortBtns.forEach(b => b.classList.remove('active'));
@@ -824,15 +868,15 @@ function initTasks() {
             renderTasks();
         });
     });
-    
+
     function addTask(e) {
         e.preventDefault();
-        
+
         const name = document.getElementById('task-name').value;
         const difficulty = parseInt(document.getElementById('task-difficulty').value);
         const deadline = document.getElementById('task-deadline').value;
         const implementation = parseInt(document.getElementById('task-implementation').value);
-        
+
         const task = {
             id: Date.now(),
             name,
@@ -842,15 +886,15 @@ function initTasks() {
             completed: false,
             createdAt: new Date()
         };
-        
+
         tasks.push(task);
         saveData();
         renderTasks();
         taskForm.reset();
         showNotification('任务已添加', 'success');
     }
-    
-    window.toggleTask = function(id) {
+
+    window.toggleTask = function (id) {
         const task = tasks.find(t => t.id === id);
         if (task) {
             task.completed = !task.completed;
@@ -858,8 +902,8 @@ function initTasks() {
             renderTasks();
         }
     };
-    
-    window.deleteTask = function(id) {
+
+    window.deleteTask = function (id) {
         if (confirm('确定要删除这个任务吗？')) {
             tasks = tasks.filter(t => t.id !== id);
             saveData();
@@ -871,7 +915,7 @@ function initTasks() {
 
 function renderTasks() {
     const tasksList = document.getElementById('tasks-list');
-    
+
     // 排序任务
     const sortedTasks = [...tasks].sort((a, b) => {
         switch (currentSort) {
@@ -890,15 +934,15 @@ function renderTasks() {
                 return 0;
         }
     });
-    
+
     tasksList.innerHTML = sortedTasks.map(task => {
         const deadline = new Date(task.deadline);
         const now = new Date();
         const isUrgent = deadline <= new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24小时内
-        
+
         const difficultyLabels = ['', '简单', '中等', '困难', '极难'];
         const implementationLabels = ['', '容易实现', '需要研究', '技术挑战', '创新突破'];
-        
+
         return `
             <div class="task-item ${task.completed ? 'completed' : ''}">
                 <div class="task-header">
@@ -931,44 +975,44 @@ function calculatePriority(task) {
     const deadline = new Date(task.deadline);
     const now = new Date();
     const daysLeft = (deadline - now) / (1000 * 60 * 60 * 24);
-    
+
     // 优先级计算：时间紧迫性 + 难度 + 实现复杂度
     let priority = 0;
-    
+
     // 时间因素（时间越少优先级越高）
     if (daysLeft < 1) priority += 100;
     else if (daysLeft < 3) priority += 50;
     else if (daysLeft < 7) priority += 25;
     else priority += Math.max(0, 20 - daysLeft);
-    
+
     // 难度因素
     priority += task.difficulty * 10;
-    
+
     // 实现复杂度因素
     priority += task.implementation * 5;
-    
+
     return priority;
 }
 
 // 初始化书签管理功能
 function initBookmarks() {
     const bookmarkForm = document.getElementById('bookmark-form');
-    
+
     bookmarkForm.addEventListener('submit', addBookmark);
-    
+
     function addBookmark(e) {
         e.preventDefault();
-        
+
         const name = document.getElementById('bookmark-name').value;
         const url = document.getElementById('bookmark-url').value;
         const color = document.getElementById('bookmark-color').value;
-        
+
         // 确保URL格式正确
         let formattedUrl = url;
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
             formattedUrl = 'https://' + url;
         }
-        
+
         const bookmark = {
             id: Date.now(),
             name,
@@ -976,7 +1020,7 @@ function initBookmarks() {
             color,
             createdAt: new Date()
         };
-        
+
         bookmarks.push(bookmark);
         saveData();
         renderBookmarks();
@@ -984,8 +1028,8 @@ function initBookmarks() {
         document.getElementById('bookmark-color').value = '#3498db'; // 重置颜色
         showNotification('网站已添加', 'success');
     }
-    
-    window.deleteBookmark = function(id) {
+
+    window.deleteBookmark = function (id) {
         if (confirm('确定要删除这个网站吗？')) {
             bookmarks = bookmarks.filter(b => b.id !== id);
             saveData();
@@ -1015,11 +1059,11 @@ function initNotebook() {
     exportNotesBtn.addEventListener('click', exportNotes);
     saveNoteBtn.addEventListener('click', saveCurrentNote);
     deleteNoteBtn.addEventListener('click', deleteCurrentNote);
-    
+
     // 搜索功能
     noteSearch.addEventListener('input', handleSearch);
     clearSearchBtn.addEventListener('click', clearSearch);
-    
+
     // 标题和内容自动保存
     noteTitle.addEventListener('input', () => {
         updateWordCount();
@@ -1029,7 +1073,7 @@ function initNotebook() {
         updateWordCount();
         autoSave();
     });
-    
+
     // 初始化显示
     renderNotesList();
 }
@@ -1043,12 +1087,12 @@ function createNewNote() {
         createdAt: new Date(),
         updatedAt: new Date()
     };
-    
+
     notes.push(newNote);
     selectNote(newNote);
     renderNotesList();
     showNotification('新笔记已创建', 'success');
-    
+
     // 聚焦到标题输入框
     setTimeout(() => {
         document.getElementById('note-title').focus();
@@ -1058,22 +1102,22 @@ function createNewNote() {
 // 选择笔记
 function selectNote(note) {
     currentNote = note;
-    
+
     const noteEditor = document.getElementById('note-editor');
     const noteWelcome = document.getElementById('note-welcome');
     const noteTitle = document.getElementById('note-title');
     const noteContent = document.getElementById('note-content');
     const noteDate = document.getElementById('note-date');
-    
+
     // 显示编辑器，隐藏欢迎页
     noteEditor.style.display = 'flex';
     noteWelcome.style.display = 'none';
-    
+
     // 填充内容
     noteTitle.value = note.title || '';
     noteContent.value = note.content || '';
     noteDate.textContent = `创建: ${formatDate(note.createdAt)} | 修改: ${formatDate(note.updatedAt)}`;
-    
+
     updateWordCount();
     updateNotesList();
 }
@@ -1081,10 +1125,10 @@ function selectNote(note) {
 // 保存当前笔记
 function saveCurrentNote() {
     if (!currentNote) return;
-    
+
     const noteTitle = document.getElementById('note-title');
     const noteContent = document.getElementById('note-content');
-    
+
     // 如果标题为空，使用内容的前20个字符作为标题
     let title = noteTitle.value.trim();
     if (!title && noteContent.value.trim()) {
@@ -1093,13 +1137,13 @@ function saveCurrentNote() {
     if (!title) {
         title = '无标题笔记';
     }
-    
+
     currentNote.title = title;
     currentNote.content = noteContent.value;
     currentNote.updatedAt = new Date();
-    
+
     noteTitle.value = title; // 更新标题输入框
-    
+
     saveData();
     renderNotesList();
     updateNoteInfo();
@@ -1109,10 +1153,10 @@ function saveCurrentNote() {
 // 删除当前笔记
 function deleteCurrentNote() {
     if (!currentNote) return;
-    
+
     if (confirm('确定要删除这个笔记吗？此操作无法恢复！')) {
         notes = notes.filter(note => note.id !== currentNote.id);
-        
+
         // 如果还有其他笔记，选择第一个
         if (notes.length > 0) {
             selectNote(notes[0]);
@@ -1122,7 +1166,7 @@ function deleteCurrentNote() {
             document.getElementById('note-editor').style.display = 'none';
             document.getElementById('note-welcome').style.display = 'flex';
         }
-        
+
         saveData();
         renderNotesList();
         showNotification('笔记已删除', 'success');
@@ -1133,7 +1177,7 @@ function deleteCurrentNote() {
 let autoSaveTimeout;
 function autoSave() {
     if (!currentNote) return;
-    
+
     clearTimeout(autoSaveTimeout);
     autoSaveTimeout = setTimeout(() => {
         saveCurrentNote();
@@ -1157,16 +1201,16 @@ function clearSearch() {
 // 渲染笔记列表
 function renderNotesList() {
     const notesList = document.getElementById('notes-list');
-    
+
     // 过滤笔记
     let filteredNotes = notes;
     if (searchQuery) {
-        filteredNotes = notes.filter(note => 
+        filteredNotes = notes.filter(note =>
             (note.title && note.title.toLowerCase().includes(searchQuery)) ||
             (note.content && note.content.toLowerCase().includes(searchQuery))
         );
     }
-    
+
     if (filteredNotes.length === 0) {
         notesList.innerHTML = `
             <div class="empty-notes">
@@ -1176,15 +1220,15 @@ function renderNotesList() {
         `;
         return;
     }
-    
+
     // 按更新时间排序
     filteredNotes.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-    
+
     notesList.innerHTML = filteredNotes.map(note => {
         const title = note.title || '无标题笔记';
         const preview = note.content ? note.content.substring(0, 100) : '空白笔记';
         const isActive = currentNote && currentNote.id === note.id;
-        
+
         return `
             <div class="note-item ${isActive ? 'active' : ''}" onclick="selectNoteById(${note.id})">
                 <div class="note-item-title">${highlightText(title, searchQuery)}</div>
@@ -1207,7 +1251,7 @@ function updateNotesList() {
 }
 
 // 通过ID选择笔记
-window.selectNoteById = function(id) {
+window.selectNoteById = function (id) {
     const note = notes.find(n => n.id === id);
     if (note) {
         selectNote(note);
@@ -1218,7 +1262,7 @@ window.selectNoteById = function(id) {
 function updateWordCount() {
     const noteContent = document.getElementById('note-content');
     const noteWordCount = document.getElementById('note-word-count');
-    
+
     if (noteContent && noteWordCount) {
         const wordCount = noteContent.value.length;
         noteWordCount.textContent = `字数: ${wordCount}`;
@@ -1228,7 +1272,7 @@ function updateWordCount() {
 // 更新笔记信息
 function updateNoteInfo() {
     if (!currentNote) return;
-    
+
     const noteDate = document.getElementById('note-date');
     noteDate.textContent = `创建: ${formatDate(currentNote.createdAt)} | 修改: ${formatDate(currentNote.updatedAt)}`;
 }
@@ -1239,31 +1283,31 @@ function exportNotes() {
         showNotification('没有笔记可以导出', 'info');
         return;
     }
-    
+
     // 创建导出内容
     let exportContent = '# 我的笔记本导出\n\n';
     exportContent += `导出时间: ${new Date().toLocaleString()}\n`;
     exportContent += `总计笔记: ${notes.length} 个\n\n`;
     exportContent += '---\n\n';
-    
+
     notes.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-    
+
     notes.forEach((note, index) => {
         exportContent += `## ${index + 1}. ${note.title || '无标题笔记'}\n\n`;
         exportContent += `**创建时间**: ${formatDate(note.createdAt)}\n`;
         exportContent += `**修改时间**: ${formatDate(note.updatedAt)}\n`;
         exportContent += `**字数**: ${note.content ? note.content.length : 0}\n\n`;
-        
+
         if (note.content) {
             exportContent += '**内容**:\n\n';
             exportContent += note.content + '\n\n';
         } else {
             exportContent += '**内容**: (空白笔记)\n\n';
         }
-        
+
         exportContent += '---\n\n';
     });
-    
+
     // 创建下载
     const blob = new Blob([exportContent], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -1272,14 +1316,14 @@ function exportNotes() {
     a.download = `我的笔记本_${new Date().toISOString().split('T')[0]}.md`;
     a.click();
     URL.revokeObjectURL(url);
-    
+
     showNotification('笔记导出成功', 'success');
 }
 
 // 文本高亮
 function highlightText(text, query) {
     if (!query || !text) return text;
-    
+
     const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     return text.replace(regex, '<span class="highlight">$1</span>');
 }
@@ -1290,7 +1334,7 @@ function formatDate(date) {
     const now = new Date();
     const diffTime = Math.abs(now - d);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) {
         return '今天 ' + d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
     } else if (diffDays === 2) {
@@ -1304,7 +1348,7 @@ function formatDate(date) {
 
 function renderBookmarks() {
     const bookmarksGrid = document.getElementById('bookmarks-grid');
-    
+
     bookmarksGrid.innerHTML = bookmarks.map(bookmark => `
         <a href="${bookmark.url}" target="_blank" class="bookmark-item" 
            style="background: ${bookmark.color};">
@@ -1320,7 +1364,7 @@ function renderBookmarks() {
 function saveData() {
     const notepad1 = document.getElementById('notepad1');
     const notepad2 = document.getElementById('notepad2');
-    
+
     const data = {
         version: '3.0', // 添加版本标识
         tasks,
@@ -1340,13 +1384,13 @@ function saveData() {
 function loadData() {
     try {
         const data = JSON.parse(localStorage.getItem('toolbox-data') || '{}');
-        
+
         // 检查数据版本，清理旧版本的布局配置
         if (!data.version || data.version !== '3.0') {
             console.log('检测到旧版本配置数据，清理布局设置...');
             localStorage.removeItem('layout-order'); // 清除旧的布局配置
             showNotification('已更新为v3.0响应式布局系统，布局配置已重置', 'info');
-            
+
             // 在控制台显示帮助信息
             console.group('📱 布局系统升级说明');
             console.log('✅ 已升级到v3.0响应式布局系统');
@@ -1357,7 +1401,7 @@ function loadData() {
             console.log('⌨️  快捷键: Ctrl+Shift+R - 重置所有配置');
             console.groupEnd();
         }
-        
+
         if (data.tasks) {
             tasks = data.tasks.map(task => ({
                 ...task,
@@ -1365,11 +1409,11 @@ function loadData() {
                 createdAt: new Date(task.createdAt)
             }));
         }
-        
+
         if (data.bookmarks) {
             bookmarks = data.bookmarks;
         }
-        
+
         if (data.currentSort) {
             currentSort = data.currentSort;
             // 更新排序按钮状态
@@ -1377,29 +1421,29 @@ function loadData() {
                 btn.classList.toggle('active', btn.dataset.sort === currentSort);
             });
         }
-        
+
         // 恢复记事本内容和状态
         const notepad1 = document.getElementById('notepad1');
         const notepad2 = document.getElementById('notepad2');
         const compareModeBtn = document.getElementById('compare-mode-btn');
         const notepad2Section = document.getElementById('notepad2-section');
         const notepadArea = document.querySelector('.notepad-area');
-        
+
         if (notepad1 && data.notepadContent1) {
             notepad1.value = data.notepadContent1;
         }
-        
+
         if (notepad2 && data.notepadContent2) {
             notepad2.value = data.notepadContent2;
         }
-        
+
         if (data.notepadCompareMode && compareModeBtn) {
             notepadCompareMode = true;
             notepad2Section.style.display = 'flex';
             notepadArea.classList.add('compare-mode');
             compareModeBtn.innerHTML = '📖 单栏模式';
         }
-        
+
         // 恢复笔记本数据
         if (data.notes) {
             notes = data.notes.map(note => ({
@@ -1408,11 +1452,11 @@ function loadData() {
                 updatedAt: new Date(note.updatedAt)
             }));
         }
-        
+
         if (data.nextNoteId) {
             nextNoteId = data.nextNoteId;
         }
-        
+
         // 恢复当前选中的笔记
         if (data.currentNoteId && notes.length > 0) {
             const savedCurrentNote = notes.find(note => note.id === data.currentNoteId);
@@ -1424,11 +1468,11 @@ function loadData() {
                 }, 300);
             }
         }
-        
+
         renderTasks();
         renderBookmarks();
         renderNotesList();
-        
+
         // 恢复布局顺序（仅在大屏幕上，避免干扰响应式设计）
         setTimeout(() => {
             // 只在大屏幕(>1024px)上恢复自定义布局顺序
@@ -1436,7 +1480,7 @@ function loadData() {
                 restoreLayoutOrder();
             }
         }, 200);
-        
+
     } catch (error) {
         console.error('加载数据失败:', error);
     }
@@ -1447,9 +1491,9 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.style.opacity = '0';
         setTimeout(() => {
@@ -1470,7 +1514,7 @@ document.addEventListener('keydown', (e) => {
             }
         }
     }
-    
+
     // Ctrl/Cmd + M 切换记事本对比模式
     if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
         e.preventDefault();
@@ -1479,7 +1523,7 @@ document.addEventListener('keydown', (e) => {
             compareModeBtn.click();
         }
     }
-    
+
     // Ctrl/Cmd + T 快速添加任务（聚焦到任务名称输入框）
     if ((e.ctrlKey || e.metaKey) && e.key === 't') {
         e.preventDefault();
@@ -1489,7 +1533,7 @@ document.addEventListener('keydown', (e) => {
             showNotification('快速添加任务模式', 'info');
         }
     }
-    
+
     // Ctrl/Cmd + Shift + R 重置所有配置
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
         e.preventDefault();
@@ -1505,7 +1549,7 @@ function clearAllUserData() {
         // 清除localStorage中的所有项目数据
         localStorage.removeItem('toolbox-data');
         localStorage.removeItem('layout-order');
-        
+
         // 重置全局变量
         tasks = [];
         bookmarks = [];
@@ -1515,10 +1559,10 @@ function clearAllUserData() {
         currentNote = null;
         nextNoteId = 1;
         searchQuery = '';
-        
+
         // 刷新页面重新初始化
         location.reload();
-        
+
     } catch (error) {
         console.error('清除数据失败:', error);
         showNotification('清除数据失败，请刷新页面重试', 'error');
@@ -1529,10 +1573,10 @@ function clearAllUserData() {
 window.clearUserData = clearAllUserData;
 
 // 调试函数：查看当前配置数据
-window.showUserData = function() {
+window.showUserData = function () {
     const toolboxData = localStorage.getItem('toolbox-data');
     const layoutOrder = localStorage.getItem('layout-order');
-    
+
     console.group('💾 用户配置数据');
     console.log('版本信息:', toolboxData ? JSON.parse(toolboxData).version || '旧版本' : '无数据');
     console.log('配置数据大小:', toolboxData ? (toolboxData.length / 1024).toFixed(2) + 'KB' : '0KB');
@@ -1545,7 +1589,7 @@ window.showUserData = function() {
 };
 
 // 调试函数：仅清除布局配置
-window.clearLayout = function() {
+window.clearLayout = function () {
     localStorage.removeItem('layout-order');
     console.log('✅ 布局配置已清除，请刷新页面查看效果');
     showNotification('布局配置已清除', 'success');
@@ -1612,7 +1656,7 @@ function exportConfiguration() {
     try {
         const toolboxData = localStorage.getItem('toolbox-data');
         const layoutOrder = localStorage.getItem('layout-order');
-        
+
         const exportData = {
             exportInfo: {
                 version: '3.0',
@@ -1626,23 +1670,23 @@ function exportConfiguration() {
 
         const dataStr = JSON.stringify(exportData, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'text/plain;charset=utf-8' });
-        
+
         const link = document.createElement('a');
         const fileName = `百宝箱配置备份_${new Date().toISOString().split('T')[0]}.txt`;
         link.href = URL.createObjectURL(dataBlob);
         link.download = fileName;
         link.click();
-        
+
         URL.revokeObjectURL(link.href);
         showNotification('配置文件导出成功！', 'success');
-        
+
         // 在控制台显示导出信息
         console.group('📁 配置导出成功');
         console.log('文件名:', fileName);
         console.log('数据大小:', (dataStr.length / 1024).toFixed(2) + 'KB');
         console.log('包含数据:', Object.keys(exportData));
         console.groupEnd();
-        
+
     } catch (error) {
         console.error('导出配置失败:', error);
         showNotification('配置导出失败：' + error.message, 'error');
@@ -1660,7 +1704,7 @@ function handleImportConfiguration(event) {
     }
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         try {
             const configData = JSON.parse(e.target.result);
             importConfiguration(configData);
@@ -1670,12 +1714,12 @@ function handleImportConfiguration(event) {
         }
     };
 
-    reader.onerror = function() {
+    reader.onerror = function () {
         showNotification('读取文件失败', 'error');
     };
 
     reader.readAsText(file, 'utf-8');
-    
+
     // 重置input值，允许重复选择同一文件
     event.target.value = '';
 }
@@ -1762,26 +1806,26 @@ function updateSystemInfo() {
     try {
         const toolboxData = localStorage.getItem('toolbox-data');
         const layoutData = localStorage.getItem('layout-order');
-        
+
         let dataSize = 0;
         let tasksCount = 0;
         let notesCount = 0;
-        
+
         if (toolboxData) {
             dataSize += toolboxData.length;
             const data = JSON.parse(toolboxData);
             tasksCount = data.tasks?.length || 0;
             notesCount = data.notes?.length || 0;
         }
-        
+
         if (layoutData) {
             dataSize += layoutData.length;
         }
-        
+
         document.getElementById('data-size-info').textContent = (dataSize / 1024).toFixed(2) + ' KB';
         document.getElementById('tasks-count-info').textContent = tasksCount;
         document.getElementById('notes-count-info').textContent = notesCount;
-        
+
     } catch (error) {
         console.error('更新系统信息失败:', error);
     }

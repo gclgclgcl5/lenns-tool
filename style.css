@@ -49,7 +49,7 @@ body {
 .function-area.dragging {
     z-index: 1000;
     transform: rotate(2deg) scale(1.02);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
     opacity: 0.5;
 }
 
@@ -91,8 +91,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* 卡片样式 */
@@ -100,7 +107,7 @@ body {
     background: white;
     border-radius: 12px;
     padding: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
     height: 100%;
@@ -177,7 +184,9 @@ label {
     color: #555;
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
     width: 100%;
     padding: 8px;
     border: 1px solid #e1e5e9;
@@ -187,7 +196,9 @@ input, textarea, select {
     background: #f8f9fa;
 }
 
-input:focus, textarea:focus, select:focus {
+input:focus,
+textarea:focus,
+select:focus {
     outline: none;
     border-color: #667eea;
     background: white;
@@ -215,7 +226,8 @@ textarea {
     align-items: center;
 }
 
-.input-section, .output-section {
+.input-section,
+.output-section {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -253,7 +265,7 @@ textarea {
     text-align: center;
     padding: 5px;
     border-radius: 4px;
-    background: rgba(0,0,0,0.05);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .ocr-status small {
@@ -271,7 +283,8 @@ textarea {
     cursor: pointer;
 }
 
-.drop-zone:hover, .drop-zone.dragover {
+.drop-zone:hover,
+.drop-zone.dragover {
     border-color: #764ba2;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
     transform: scale(1.02);
@@ -301,8 +314,49 @@ textarea {
     max-width: 100%;
     max-height: 400px;
     border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     margin-bottom: 20px;
+}
+
+/* 任务标题区域样式 */
+.tasks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.tasks-header h2 {
+    margin: 0;
+    flex: 1;
+}
+
+/* 快速添加按钮样式 */
+.quick-add-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    flex-shrink: 0;
+}
+
+.quick-add-btn:hover {
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #764ba2, #667eea);
+}
+
+.quick-add-btn:active {
+    transform: translateY(0) scale(0.95);
 }
 
 /* 任务列表样式 */
@@ -318,6 +372,11 @@ textarea {
     border-radius: 8px;
     margin-bottom: 10px;
     flex-shrink: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
+    will-change: opacity, transform;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+    border: 1px solid rgba(102, 126, 234, 0.2);
 }
 
 .add-task-section h3 {
@@ -399,15 +458,38 @@ textarea {
     color: white;
 }
 
-.badge.difficulty-1 { background: #28a745; }
-.badge.difficulty-2 { background: #ffc107; color: #333; }
-.badge.difficulty-3 { background: #fd7e14; }
-.badge.difficulty-4 { background: #dc3545; }
+.badge.difficulty-1 {
+    background: #28a745;
+}
 
-.badge.implementation-1 { background: #17a2b8; }
-.badge.implementation-2 { background: #6f42c1; }
-.badge.implementation-3 { background: #e83e8c; }
-.badge.implementation-4 { background: #6c757d; }
+.badge.difficulty-2 {
+    background: #ffc107;
+    color: #333;
+}
+
+.badge.difficulty-3 {
+    background: #fd7e14;
+}
+
+.badge.difficulty-4 {
+    background: #dc3545;
+}
+
+.badge.implementation-1 {
+    background: #17a2b8;
+}
+
+.badge.implementation-2 {
+    background: #6f42c1;
+}
+
+.badge.implementation-3 {
+    background: #e83e8c;
+}
+
+.badge.implementation-4 {
+    background: #6c757d;
+}
 
 .task-deadline {
     color: #666;
@@ -457,12 +539,12 @@ textarea {
     text-decoration: none;
     font-weight: bold;
     transition: all 0.3s ease;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 .bookmark-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     text-decoration: none;
     color: white;
 }
@@ -526,7 +608,8 @@ textarea {
     flex-grow: 1;
 }
 
-#notepad1, #notepad2 {
+#notepad1,
+#notepad2 {
     min-height: 200px;
     resize: vertical;
     flex-grow: 1;
@@ -541,7 +624,7 @@ textarea {
     flex: 1;
 }
 
-.compare-mode #notepad1, 
+.compare-mode #notepad1,
 .compare-mode #notepad2 {
     min-height: 150px;
 }
@@ -568,7 +651,7 @@ textarea {
 /* 翻译工具紧凑布局 */
 .translator-container {
     display: grid;
-    grid-template-areas: 
+    grid-template-areas:
         "input output"
         "buttons buttons";
     grid-template-columns: 1fr 1fr;
@@ -598,7 +681,8 @@ textarea {
     gap: 10px;
 }
 
-.input-section textarea, .output-section textarea {
+.input-section textarea,
+.output-section textarea {
     flex-grow: 1;
     min-height: 120px;
 }
@@ -692,9 +776,17 @@ textarea {
 }
 
 @keyframes pulse {
-    0% { opacity: 0.8; }
-    50% { opacity: 0.4; }
-    100% { opacity: 0.8; }
+    0% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 0.8;
+    }
 }
 
 /* 响应式设计 - 优化布局确保一屏显示完所有功能 */
@@ -710,55 +802,55 @@ textarea {
     .container {
         padding: 3px;
     }
-    
+
     .functions-grid {
         grid-template-columns: 1fr 1fr;
         grid-template-rows: 1fr 1fr 1fr;
         gap: 3px;
         height: calc(100vh - 6px);
     }
-    
+
     .function-area {
         min-height: auto;
     }
-    
+
     /* 为小屏幕优化卡片内容 */
     .card {
         padding: 8px;
     }
-    
+
     .card h2 {
         font-size: 1rem;
         margin-bottom: 8px;
     }
-    
+
     .translator-container {
-        grid-template-areas: 
+        grid-template-areas:
             "input"
             "output"
             "buttons";
         grid-template-columns: 1fr;
         grid-template-rows: 1fr 1fr auto;
     }
-    
+
     .form-row {
         flex-direction: column;
         gap: 8px;
     }
-    
+
     .sorting-options {
         justify-content: center;
     }
-    
+
     .bookmarks-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .notepad-controls {
         flex-direction: column;
         gap: 5px;
     }
-    
+
     .compare-mode .notepad-container {
         flex-direction: column;
     }
@@ -776,7 +868,9 @@ textarea {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* 通知样式 */
@@ -805,8 +899,15 @@ textarea {
 }
 
 @keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 /* ===== 笔记本功能样式 ===== */
@@ -1062,17 +1163,17 @@ textarea {
         flex-direction: column;
         height: auto;
     }
-    
+
     .notebook-sidebar {
         width: 100%;
         min-width: auto;
         max-height: 200px;
     }
-    
+
     .notebook-actions {
         flex-wrap: wrap;
     }
-    
+
     .btn.small {
         flex: 1;
         min-width: 80px;
@@ -1084,38 +1185,40 @@ textarea {
     .container {
         padding: 2px;
     }
-    
+
     .functions-grid {
         gap: 2px;
         height: calc(100vh - 4px);
     }
-    
+
     .card {
         padding: 6px;
     }
-    
+
     .card h2 {
         font-size: 0.9rem;
         margin-bottom: 6px;
     }
-    
+
     /* 进一步压缩表单元素间距 */
     .form-group {
         margin-bottom: 4px;
     }
-    
+
     /* 优化按钮大小 */
     .btn {
         padding: 4px 8px;
         font-size: 0.8rem;
     }
-    
-         /* 优化输入框 */
-     input, textarea, select {
-         font-size: 0.85rem;
-         padding: 4px;
-     }
- }
+
+    /* 优化输入框 */
+    input,
+    textarea,
+    select {
+        font-size: 0.85rem;
+        padding: 4px;
+    }
+}
 
 /* 设置按钮样式 */
 .settings-panel {
@@ -1163,8 +1266,13 @@ textarea {
 }
 
 @keyframes modalFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-content {
@@ -1181,8 +1289,15 @@ textarea {
 }
 
 @keyframes modalSlideIn {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .modal-header {
@@ -1301,25 +1416,25 @@ textarea {
         height: 40px;
         font-size: 16px;
     }
-    
+
     .modal-content {
         margin: 10% auto;
         width: 95%;
     }
-    
+
     .modal-header {
         padding: 15px;
     }
-    
+
     .modal-header h2 {
         font-size: 1.3rem;
     }
-    
+
     .modal-body {
         padding: 15px;
     }
-    
+
     .system-info {
         grid-template-columns: 1fr;
     }
-} 
+}

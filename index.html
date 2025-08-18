@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <!-- Font Awesome已替换为表情符号，不再需要 -->
     <!-- <link href="libs/fontawesome.css" rel="stylesheet"> -->
 </head>
+
 <body>
     <div class="container">
         <!-- 设置按钮 -->
@@ -19,7 +21,7 @@
 
         <!-- 功能区域网格布局 -->
         <div class="functions-grid">
-            
+
             <!-- 翻译工具区域 -->
             <div class="function-area translator-area">
                 <div class="card translator-card">
@@ -134,9 +136,14 @@
             <!-- 工作清单区域 -->
             <div class="function-area tasks-area">
                 <div class="card tasks-card">
-                    <h2>✅ 工作清单管理</h2>
+                    <div class="tasks-header">
+                        <h2>✅ 工作清单管理</h2>
+                        <button id="quick-add-task-btn" class="quick-add-btn" title="快速添加任务">
+                            ➕
+                        </button>
+                    </div>
                     <div class="tasks-container">
-                        <div class="add-task-section">
+                        <div class="add-task-section" id="add-task-section" style="display: none;">
                             <h3>添加新任务</h3>
                             <form id="task-form">
                                 <div class="form-group">
@@ -258,7 +265,8 @@
                                         </button>
                                     </div>
                                 </div>
-                                <textarea id="note-content" placeholder="在此输入笔记内容..." class="note-content-area"></textarea>
+                                <textarea id="note-content" placeholder="在此输入笔记内容..."
+                                    class="note-content-area"></textarea>
                                 <div class="note-info">
                                     <span id="note-date"></span>
                                     <span id="note-word-count">字数: 0</span>
@@ -298,7 +306,7 @@
                         📤 导出配置文件
                     </button>
                 </div>
-                
+
                 <div class="settings-section">
                     <h3>📤 配置恢复</h3>
                     <p>从备份文件恢复所有配置数据</p>
@@ -307,7 +315,7 @@
                         📥 导入配置文件
                     </button>
                 </div>
-                
+
                 <div class="settings-section">
                     <h3>ℹ️ 系统信息</h3>
                     <div class="system-info">
@@ -329,7 +337,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="settings-section danger-zone">
                     <h3>⚠️ 危险操作</h3>
                     <p>谨慎使用：此操作将清除所有数据且无法恢复</p>
@@ -345,4 +353,5 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <script src="script.js"></script>
 </body>
-</html> 
+
+</html>
