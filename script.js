@@ -499,8 +499,10 @@ function checkTesseractLoaded() {
 // 初始化OCR功能
 function initOCR() {
     const imageInput = document.getElementById('image-input');
+    const selectImageBtn = document.getElementById('select-image-btn');
     const dropZone = document.getElementById('drop-zone');
     const pasteBtn = document.getElementById('paste-btn');
+    const autoExtractCheckbox = document.getElementById('auto-extract-checkbox');
     const previewSection = document.getElementById('preview-section');
     const previewImage = document.getElementById('preview-image');
     const extractBtn = document.getElementById('extract-text-btn');
@@ -509,6 +511,11 @@ function initOCR() {
 
     // 文件上传
     imageInput.addEventListener('change', handleImageSelect);
+    
+    // 选择图片按钮
+    selectImageBtn.addEventListener('click', () => {
+        imageInput.click();
+    });
 
     // 拖拽上传
     dropZone.addEventListener('dragover', (e) => {
@@ -520,12 +527,19 @@ function initOCR() {
         dropZone.classList.remove('dragover');
     });
 
-    dropZone.addEventListener('drop', (e) => {
+    dropZone.addEventListener('drop', async (e) => {
         e.preventDefault();
         dropZone.classList.remove('dragover');
         const files = e.dataTransfer.files;
         if (files.length > 0) {
-            handleImageFile(files[0]);
+            const autoExtract = autoExtractCheckbox.checked;
+            if (autoExtract) {
+                showNotification('图片上传成功，正在提取文字...', 'success');
+                await handleImageFileAndExtract(files[0], true);
+            } else {
+                showNotification('图片上传成功', 'success');
+                handleImageFile(files[0]);
+            }
         }
     });
 
@@ -537,7 +551,14 @@ function initOCR() {
                 for (const type of clipboardItem.types) {
                     if (type.startsWith('image/')) {
                         const blob = await clipboardItem.getType(type);
-                        handleImageFile(blob);
+                        const autoExtract = autoExtractCheckbox.checked;
+                        if (autoExtract) {
+                            showNotification('图片粘贴成功，正在提取文字...', 'success');
+                            await handleImageFileAndExtract(blob, true);
+                        } else {
+                            showNotification('图片粘贴成功', 'success');
+                            handleImageFile(blob);
+                        }
                         return;
                     }
                 }
@@ -558,6 +579,19 @@ function initOCR() {
         document.execCommand('copy');
         showNotification('文字已复制到剪贴板', 'success');
     });
+
+    // 自动提取设置变化
+    autoExtractCheckbox.addEventListener('change', () => {
+        const isChecked = autoExtractCheckbox.checked;
+        localStorage.setItem('ocr-auto-extract', isChecked.toString());
+        showNotification(isChecked ? '已开启自动提取文字' : '已关闭自动提取文字', 'info');
+    });
+
+    // 加载自动提取设置
+    const savedAutoExtract = localStorage.getItem('ocr-auto-extract');
+    if (savedAutoExtract !== null) {
+        autoExtractCheckbox.checked = savedAutoExtract === 'true';
+    }
 
     // 初始化OCR状态检查
     checkOCRStatus();
@@ -594,10 +628,17 @@ function initOCR() {
         }
     }
 
-    function handleImageSelect(e) {
+    async function handleImageSelect(e) {
         const file = e.target.files[0];
         if (file) {
-            handleImageFile(file);
+            const autoExtract = autoExtractCheckbox.checked;
+            if (autoExtract) {
+                showNotification('图片选择成功，正在提取文字...', 'success');
+                await handleImageFileAndExtract(file, true);
+            } else {
+                showNotification('图片选择成功', 'success');
+                handleImageFile(file);
+            }
         }
     }
 
@@ -613,6 +654,34 @@ function initOCR() {
             previewSection.style.display = 'block';
             extractedText.value = '';
             copyBtn.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function handleImageFileAndExtract(file, autoExtract = false) {
+        if (!file.type.startsWith('image/')) {
+            showNotification('请选择图片文件', 'error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            previewImage.src = e.target.result;
+            
+            if (autoExtract) {
+                // 自动提取模式：隐藏预览区域，直接开始提取
+                previewSection.style.display = 'none';
+                extractedText.value = '';
+                copyBtn.style.display = 'none';
+                
+                // 直接开始提取文字
+                await extractTextFromImage();
+            } else {
+                // 手动模式：显示预览，等待用户点击
+                previewSection.style.display = 'block';
+                extractedText.value = '';
+                copyBtn.style.display = 'none';
+            }
         };
         reader.readAsDataURL(file);
     }
@@ -743,16 +812,13 @@ function initOCR() {
             return '';
         }
 
-        // 完全移除所有空格和空白字符，只保留换行
+        // 去除换行符，保持文字密集展示，但保留单词间的空格
         let cleanedText = text
-            // 移除所有空格、制表符等空白字符（保留换行符）
-            .replace(/[ \t\r\f\v]+/g, '')
-            // 处理换行符：移除空行，合并多个换行
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0)
-            .join('\n')
-            // 移除开头和结尾的换行
+            // 将所有换行符、制表符等替换为空格
+            .replace(/[\n\r\t\f\v]+/g, ' ')
+            // 将多个连续空格合并为一个空格
+            .replace(/\s+/g, ' ')
+            // 移除开头和结尾的空白
             .trim();
 
         return cleanedText;

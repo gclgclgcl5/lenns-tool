@@ -95,38 +95,52 @@
                 </div>
             </div>
 
-            <!-- OCR文字提取区域 -->
+                        <!-- OCR文字提取区域 -->
             <div class="function-area ocr-area">
                 <div class="card ocr-card">
-                    <h2>🖼️ 图片文字提取</h2>
+                    <div class="ocr-header">
+                        <h2>🖼️ 图片文字提取</h2>
+                        <div class="ocr-settings">
+                            <label class="auto-extract-toggle">
+                                <input type="checkbox" id="auto-extract-checkbox" checked>
+                                <span class="toggle-text">自动提取</span>
+                            </label>
+                        </div>
+                    </div>
                     <div class="ocr-container">
-                        <div class="upload-section">
-                            <div class="drop-zone" id="drop-zone">
-                                ☁️
-                                <p>拖拽图片或点击选择</p>
-                                <input type="file" id="image-input" accept="image/*" style="display: none;">
-                                <button class="btn primary" onclick="document.getElementById('image-input').click()">
-                                    选择图片
+                        <div class="ocr-input-section">
+                            <div class="upload-controls">
+                                <div class="drop-zone" id="drop-zone">
+                                    <div class="drop-zone-content">
+                                        <div class="drop-zone-icon">📷</div>
+                                        <p>拖拽图片或点击选择</p>
+                                        <input type="file" id="image-input" accept="image/*" style="display: none;">
+                                        <button class="btn primary compact-btn" id="select-image-btn">
+                                            📁 选择图片
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="btn secondary compact-btn" id="paste-btn">
+                                    📋 粘贴图片
                                 </button>
                             </div>
-                                                            <div class="paste-section">
-                                    <button class="btn secondary" id="paste-btn">
-                                        📋 粘贴图片
-                                    </button>
+                            <div class="preview-section" id="preview-section" style="display: none;">
+                                <div class="image-preview-container">
+                                    <img id="preview-image" alt="预览图片">
                                 </div>
+                                <button class="btn primary" id="extract-text-btn">
+                                    ✨ 提取文字
+                                </button>
+                            </div>
                         </div>
-                        <div class="preview-section" id="preview-section" style="display: none;">
-                            <img id="preview-image" alt="预览图片">
-                            <button class="btn primary" id="extract-text-btn">
-                                ✨ 提取文字
-                            </button>
-                        </div>
-                        <div class="result-section">
-                            <label for="extracted-text">提取的文字:</label>
+                        <div class="ocr-result-section">
+                            <div class="result-header">
+                                <label for="extracted-text">提取的文字:</label>
+                                <button class="btn secondary small" id="copy-text-btn" style="display: none;">
+                                    📄 复制
+                                </button>
+                            </div>
                             <textarea id="extracted-text" placeholder="提取的文字将在这里显示..." readonly></textarea>
-                            <button class="btn secondary" id="copy-text-btn" style="display: none;">
-                                📄 复制文字
-                            </button>
                         </div>
                     </div>
                 </div>
