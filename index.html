@@ -151,13 +151,22 @@
                 <div class="card tasks-card">
                     <div class="tasks-header">
                         <h2>✅ 工作清单管理</h2>
-                        <div class="task-buttons">
-                            <button id="simple-mode-btn" class="simple-btn" title="切换简单模式">
-                                简单
-                            </button>
-                            <button id="quick-add-task-btn" class="quick-add-btn" title="快速添加任务">
-                                ➕
-                            </button>
+                        <div class="tasks-header-controls">
+                            <div class="sorting-options">
+                                <label>排序:</label>
+                                <button class="btn secondary sort-btn active" data-sort="deadline">时间</button>
+                                <button class="btn secondary sort-btn" data-sort="difficulty">难度</button>
+                                <button class="btn secondary sort-btn" data-sort="implementation">实现</button>
+                                <button class="btn secondary sort-btn" data-sort="priority">智能</button>
+                            </div>
+                            <div class="task-buttons">
+                                <button id="generate-report-btn" class="generate-report-btn" title="一键生成周报">
+                                    📝 生成周报
+                                </button>
+                                <button id="quick-add-task-btn" class="quick-add-btn" title="快速添加任务">
+                                    ➕
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="tasks-container">
@@ -168,32 +177,27 @@
                                     <input type="text" id="task-name" placeholder="任务名称" required>
                                 </div>
                                 <div class="form-row">
-                                    <div class="form-group" id="difficulty-group">
+                                    <div class="form-group">
                                         <select id="task-difficulty">
+                                            <option value="">选择难度 (可选)</option>
                                             <option value="1">简单</option>
                                             <option value="2">中等</option>
                                             <option value="3">困难</option>
                                             <option value="4">极难</option>
                                         </select>
                                     </div>
-                                    <div class="form-group" id="deadline-group">
-                                        <input type="datetime-local" id="task-deadline" required>
-                                        <small class="simple-mode-hint" style="display: none;">简单模式下自动设为明天</small>
+                                    <div class="form-group">
+                                        <input type="datetime-local" id="task-deadline" placeholder="截止时间 (可选)">
+                                        <small class="field-hint">可选：不设置则无截止时间</small>
                                     </div>
-                                    <div class="form-group" id="implementation-group">
+                                    <div class="form-group">
                                         <select id="task-implementation">
+                                            <option value="">实现难度 (可选)</option>
                                             <option value="1">容易实现</option>
                                             <option value="2">需要研究</option>
                                             <option value="3">技术挑战</option>
                                             <option value="4">创新突破</option>
                                         </select>
-                                    </div>
-                                </div>
-                                <div id="simple-mode-message" class="simple-mode-message" style="display: none;">
-                                    <div class="simple-mode-icon">✨</div>
-                                    <div class="simple-mode-text">
-                                        <span>简单模式已开启</span>
-                                        <small>任务将自动设置为中等难度，截止时间为明天</small>
                                     </div>
                                 </div>
                                 <div class="task-form-actions">
@@ -203,13 +207,7 @@
                                 </div>
                             </form>
                         </div>
-                        <div class="sorting-options">
-                            <label>排序:</label>
-                            <button class="btn secondary sort-btn active" data-sort="deadline">时间</button>
-                            <button class="btn secondary sort-btn" data-sort="difficulty">难度</button>
-                            <button class="btn secondary sort-btn" data-sort="implementation">实现</button>
-                            <button class="btn secondary sort-btn" data-sort="priority">智能</button>
-                        </div>
+
                         <div class="tasks-list" id="tasks-list">
                             <!-- 任务列表将在这里显示 -->
                         </div>
@@ -389,6 +387,50 @@
                     <button id="reset-all-btn" class="btn danger">
                         🗑️ 重置所有数据
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 周报生成弹窗 -->
+    <div id="report-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📝 一键生成周报</h3>
+                <button class="modal-close" id="close-report-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="report-step" id="task-selection-step">
+                    <div class="task-selection-header">
+                        <h4>选择要包含在周报中的任务：</h4>
+                        <div class="task-selection-controls">
+                            <button type="button" class="btn small secondary" id="select-all-tasks-btn">全选</button>
+                            <button type="button" class="btn small secondary" id="deselect-all-tasks-btn">取消全选</button>
+                        </div>
+                    </div>
+                    <div class="task-selection-list" id="task-selection-list">
+                        <!-- 任务选择列表将在这里动态生成 -->
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn secondary" id="cancel-report-btn">取消</button>
+                        <button class="btn primary" id="generate-report-submit-btn">生成周报</button>
+                    </div>
+                </div>
+                <div class="report-step" id="report-generation-step" style="display: none;">
+                    <div class="generation-status">
+                        <div class="loading-spinner"></div>
+                        <p>正在使用 DeepSeek AI 生成周报...</p>
+                    </div>
+                </div>
+                <div class="report-step" id="report-result-step" style="display: none;">
+                    <h4>生成的周报：</h4>
+                    <div class="report-preview">
+                        <textarea id="generated-report" readonly></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn secondary" id="copy-report-btn">📋 复制周报</button>
+                        <button class="btn primary" id="close-result-btn">完成</button>
+                    </div>
                 </div>
             </div>
         </div>

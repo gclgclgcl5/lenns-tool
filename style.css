@@ -177,32 +177,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* 简单模式下的表单样式 */
-.simple-mode-form .form-group {
-    margin-bottom: 15px;
-}
 
-.simple-mode-form input[type="text"] {
-    font-size: 1.1rem;
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: 1px solid rgba(102, 126, 234, 0.3);
-    background: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-}
-
-.simple-mode-form input[type="text"]:focus {
-    border-color: #ff9800;
-    box-shadow: 0 2px 15px rgba(255, 152, 0, 0.2);
-    outline: none;
-}
-
-.simple-mode-form .btn.primary {
-    margin-top: 10px;
-    padding: 12px 20px;
-    font-size: 1rem;
-}
 
 /* 任务表单按钮居中 */
 .task-form-actions {
@@ -632,13 +607,23 @@ textarea {
 .tasks-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .tasks-header h2 {
     margin: 0;
-    flex: 1;
+    flex-shrink: 0;
+}
+
+.tasks-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    height: 38px; /* 固定高度确保对齐 */
 }
 
 /* 任务按钮容器 */
@@ -646,60 +631,46 @@ textarea {
     display: flex;
     align-items: center;
     gap: 8px;
+    height: 100%; /* 使用父元素的高度 */
 }
 
-/* 简单模式按钮样式 */
-.simple-btn {
-    background: linear-gradient(135deg, #ff9800, #ff5722);
+/* 生成周报按钮样式 */
+.generate-report-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
     border: none;
     border-radius: 16px;
-    padding: 4px 12px;
+    padding: 0 14px;
+    height: 32px; /* 固定高度与排序按钮一致 */
     font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
-.simple-btn:hover {
+.generate-report-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
-    background: linear-gradient(135deg, #ff5722, #ff9800);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #764ba2, #667eea);
 }
 
-.simple-btn:active {
+.generate-report-btn:active {
     transform: translateY(0) scale(0.95);
 }
 
-.simple-btn.active {
-    background: linear-gradient(135deg, #ff5722, #e64a19);
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
-}
 
-/* 简单模式提示文本 */
-.simple-mode-hint {
+
+/* 字段提示文本 */
+.field-hint {
     color: #666;
     font-style: italic;
     display: block;
     margin-top: 4px;
     font-size: 0.8rem;
-}
-
-/* 简单模式消息 */
-.simple-mode-message {
-    background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 87, 34, 0.1));
-    border: 1px solid rgba(255, 152, 0, 0.3);
-    border-radius: 8px;
-    padding: 12px 15px;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    animation: fadeIn 0.3s ease;
-    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.1);
 }
 
 /* 添加任务按钮容器 */
@@ -712,29 +683,7 @@ textarea {
     display: block;
 }
 
-.simple-mode-icon {
-    font-size: 1.5rem;
-    color: #ff9800;
-}
 
-.simple-mode-text {
-    flex: 1;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-}
-
-.simple-mode-text span {
-    color: #ff5722;
-    font-weight: bold;
-    font-size: 0.95rem;
-    margin-bottom: 2px;
-}
-
-.simple-mode-text small {
-    color: #666;
-    font-size: 0.8rem;
-}
 
 /* 快速添加按钮样式 */
 .quick-add-btn {
@@ -782,6 +731,16 @@ textarea {
     will-change: opacity, transform;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
     border: 1px solid rgba(102, 126, 234, 0.2);
+    max-height: 200px; /* 设置添加任务区域的最大高度 */
+}
+
+/* 当添加任务区域隐藏时 */
+.add-task-section.hidden {
+    max-height: 0;
+    padding: 0 15px;
+    margin-bottom: 0;
+    opacity: 0;
+    transform: translateY(-10px);
 }
 
 /* 模式切换动画 */
@@ -805,19 +764,60 @@ textarea {
     flex-grow: 1;
     overflow-y: auto;
     width: 100%;
+    padding-right: 5px; /* 为滚动条留出空间 */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: max-height 0.3s ease; /* 添加高度变化的过渡动画 */
+    /* 默认高度：当添加任务区域显示时的高度 */
+    max-height: 300px; /* 基础高度 */
+}
+
+/* 当添加任务区域隐藏时 */
+.tasks-container.add-section-hidden .tasks-list {
+    max-height: 500px; /* 利用添加任务区域腾出的空间 */
+}
+
+/* 自定义滚动条样式 */
+.tasks-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tasks-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.tasks-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.tasks-list::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
 }
 
 .sorting-options {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 8px;
     flex-wrap: wrap;
+    height: 100%; /* 使用父元素的高度 */
 }
 
 .sorting-options label {
-    margin-bottom: 0;
-    margin-right: 10px;
+    color: #333;
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin: 0 3px 0 0;
+    white-space: nowrap;
+}
+
+.sort-btn {
+    height: 32px; /* 固定高度与生成周报按钮一致 */
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
 }
 
 .sort-btn.active {
@@ -2147,5 +2147,282 @@ textarea {
 
     .system-info {
         grid-template-columns: 1fr;
+    }
+}
+
+/* 弹窗样式 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: calc(80vh - 80px);
+    overflow-y: auto;
+}
+
+.report-step h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.task-selection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.task-selection-header h4 {
+    margin: 0;
+    flex: 1;
+}
+
+.task-selection-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.task-selection-controls .btn.small {
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    border-radius: 4px;
+}
+
+.task-selection-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.task-selection-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.2s;
+}
+
+.task-selection-item:hover {
+    background: #f8f9fa;
+}
+
+.task-selection-item:last-child {
+    border-bottom: none;
+}
+
+.task-selection-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #667eea;
+}
+
+.task-selection-info {
+    flex: 1;
+}
+
+.task-selection-name {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.task-selection-meta {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    gap: 10px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.generation-status {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.generation-status p {
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.report-preview {
+    margin-bottom: 20px;
+}
+
+.report-preview textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    resize: vertical;
+    background: #f8f9fa;
+}
+
+/* 周报弹窗响应式设计 */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    .modal-header {
+        padding: 15px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .modal-actions .btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    .task-buttons {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .generate-report-btn {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .tasks-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .tasks-header-controls {
+        width: 100%;
+        justify-content: space-between;
+        flex-direction: row;
+    }
+    
+    .sorting-options {
+        order: 1;
+    }
+    
+    .task-buttons {
+        order: 2;
+    }
+    
+    .task-selection-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .task-selection-controls {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .task-selection-controls .btn.small {
+        padding: 6px 12px;
+        font-size: 0.8rem;
     }
 }

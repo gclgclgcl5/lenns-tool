@@ -3,7 +3,6 @@ let tasks = [];
 let bookmarks = [];
 let currentSort = 'deadline';
 let notepadCompareMode = false;
-let isSimpleMode = false; // 简单模式状态标记
 
 // 笔记本相关变量
 let notes = [];
@@ -21,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initNotepad();
     initNotebook();
     initSettings(); // 初始化设置功能
+    initReportModal(); // 初始化周报弹窗
     loadData();
 
     // 确保DOM完全加载后再初始化拖拽
@@ -901,115 +901,35 @@ function initTasks() {
     const taskForm = document.getElementById('task-form');
     const sortBtns = document.querySelectorAll('.sort-btn');
     const quickAddBtn = document.getElementById('quick-add-task-btn');
-    const simpleModeBtn = document.getElementById('simple-mode-btn');
-    const sortingOptions = document.querySelector('.sorting-options');
+    const generateReportBtn = document.getElementById('generate-report-btn');
+    // 初始化添加任务区域状态（默认隐藏）
+    const addTaskSection = document.getElementById('add-task-section');
+    const tasksContainer = document.querySelector('.tasks-container');
+    if (addTaskSection && tasksContainer) {
+        addTaskSection.style.display = 'none';
+        addTaskSection.classList.add('hidden');
+        tasksContainer.classList.add('add-section-hidden');
+    }
 
-    // 从本地存储加载简单模式状态
-    isSimpleMode = localStorage.getItem('isSimpleMode') === 'true';
-    updateSimpleModeUI();
+    // 生成周报功能
+    generateReportBtn.addEventListener('click', openReportModal);
 
     taskForm.addEventListener('submit', addTask);
 
-    // 简单模式按钮功能
-    simpleModeBtn.addEventListener('click', () => {
-        isSimpleMode = !isSimpleMode;
-        localStorage.setItem('isSimpleMode', isSimpleMode);
 
-        // 添加动画效果
-        const taskForm = document.getElementById('task-form');
-        if (taskForm) {
-            taskForm.classList.add('mode-transition');
-            setTimeout(() => {
-                updateSimpleModeUI();
-                setTimeout(() => {
-                    taskForm.classList.remove('mode-transition');
-                }, 300);
-            }, 50);
-        } else {
-            updateSimpleModeUI();
-        }
-
-        // 显示通知
-        const modeText = isSimpleMode ? '简单模式' : '完整模式';
-        showNotification(`已切换到${modeText}`, 'info');
-    });
-
-    // 更新简单模式UI状态
-    function updateSimpleModeUI() {
-        // 更新按钮样式
-        simpleModeBtn.classList.toggle('active', isSimpleMode);
-
-        // 更新表单样式类
-        const taskForm = document.getElementById('task-form');
-        if (taskForm) {
-            if (isSimpleMode) {
-                taskForm.classList.add('simple-mode-form');
-            } else {
-                taskForm.classList.remove('simple-mode-form');
-            }
-        }
-
-        // 更新排序选项显示状态
-        sortingOptions.style.display = isSimpleMode ? 'none' : 'flex';
-
-        // 获取所有需要控制的元素
-        const taskDeadline = document.getElementById('task-deadline');
-        const simpleModeHint = document.querySelector('.simple-mode-hint');
-        const difficultyGroup = document.getElementById('difficulty-group');
-        const implementationGroup = document.getElementById('implementation-group');
-        const simpleModeMessage = document.getElementById('simple-mode-message');
-
-        if (isSimpleMode) {
-            // 简单模式下的UI - 干净整洁
-
-            // 隐藏难度和实现难度选择器
-            if (difficultyGroup) difficultyGroup.style.display = 'none';
-            if (implementationGroup) implementationGroup.style.display = 'none';
-
-            // 隐藏日期字段组，并设置为不必填
-            const deadlineGroup = document.getElementById('deadline-group');
-            if (deadlineGroup) deadlineGroup.style.display = 'none';
-
-            if (taskDeadline) {
-                taskDeadline.removeAttribute('required');
-                taskDeadline.disabled = true;
-            }
-
-            // 不显示提示信息，保持界面干净
-            if (simpleModeHint) simpleModeHint.style.display = 'none';
-            if (simpleModeMessage) simpleModeMessage.style.display = 'none';
-
-        } else {
-            // 完整模式下的UI
-
-            // 显示所有字段
-            if (difficultyGroup) difficultyGroup.style.display = 'block';
-            if (implementationGroup) implementationGroup.style.display = 'block';
-
-            // 显示日期字段组，并设置为必填
-            const deadlineGroup = document.getElementById('deadline-group');
-            if (deadlineGroup) deadlineGroup.style.display = 'block';
-
-            if (taskDeadline) {
-                taskDeadline.setAttribute('required', '');
-                taskDeadline.disabled = false;
-            }
-
-            // 隐藏提示信息
-            if (simpleModeHint) simpleModeHint.style.display = 'none';
-            if (simpleModeMessage) simpleModeMessage.style.display = 'none';
-        }
-    }
 
     // 快速添加按钮功能 - 显示/隐藏任务添加表单
     quickAddBtn.addEventListener('click', () => {
         const addTaskSection = document.getElementById('add-task-section');
+        const tasksContainer = document.querySelector('.tasks-container');
         const isHidden = addTaskSection.style.display === 'none';
 
         // 切换表单显示状态
         if (isHidden) {
             // 显示表单
             addTaskSection.style.display = 'block';
+            addTaskSection.classList.remove('hidden');
+            tasksContainer.classList.remove('add-section-hidden');
 
             // 添加动画效果
             addTaskSection.style.opacity = '0';
@@ -1023,9 +943,6 @@ function initTasks() {
                 // 聚焦到任务名称输入框
                 const taskNameInput = document.getElementById('task-name');
                 taskNameInput.focus();
-
-                // 更新简单模式UI（确保日期字段状态正确）
-                updateSimpleModeUI();
             }, 10);
 
             // 更改按钮图标为减号
@@ -1033,6 +950,9 @@ function initTasks() {
             quickAddBtn.title = '隐藏添加表单';
         } else {
             // 隐藏表单
+            addTaskSection.classList.add('hidden');
+            tasksContainer.classList.add('add-section-hidden');
+            
             addTaskSection.style.opacity = '0';
             addTaskSection.style.transform = 'translateY(-20px)';
 
@@ -1060,28 +980,17 @@ function initTasks() {
         e.preventDefault();
 
         const name = document.getElementById('task-name').value;
-        let difficulty, implementation, deadline;
-
-        // 简单模式下使用默认值
-        if (isSimpleMode) {
-            // 简单模式下默认难度和实现难度都设为中等(2)
-            difficulty = 2;
-            implementation = 2;
-
-            // 自动设置截止日期为明天
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            tomorrow.setHours(18, 0, 0, 0); // 设置为明天下午6点
-            deadline = tomorrow;
-        } else {
-            // 完整模式下使用用户选择的值
-            difficulty = parseInt(document.getElementById('task-difficulty').value);
-            implementation = parseInt(document.getElementById('task-implementation').value);
-
-            // 使用用户选择的日期
-            const deadlineInput = document.getElementById('task-deadline').value;
-            deadline = new Date(deadlineInput);
-        }
+        
+        // 获取可选字段的值，如果未选择则使用默认值或null
+        const difficultyValue = document.getElementById('task-difficulty').value;
+        const difficulty = difficultyValue ? parseInt(difficultyValue) : null;
+        
+        const implementationValue = document.getElementById('task-implementation').value;
+        const implementation = implementationValue ? parseInt(implementationValue) : null;
+        
+        // 获取截止时间，如果未设置则为null
+        const deadlineInput = document.getElementById('task-deadline').value;
+        const deadline = deadlineInput ? new Date(deadlineInput) : null;
 
         const task = {
             id: Date.now(),
@@ -1132,10 +1041,22 @@ function renderTasks() {
     const sortedTasks = [...tasks].sort((a, b) => {
         switch (currentSort) {
             case 'deadline':
+                // 处理null值：有截止时间的排在前面，null排在后面
+                if (!a.deadline && !b.deadline) return 0;
+                if (!a.deadline) return 1;
+                if (!b.deadline) return -1;
                 return new Date(a.deadline) - new Date(b.deadline);
             case 'difficulty':
+                // 处理null值：有难度的排在前面
+                if (!a.difficulty && !b.difficulty) return 0;
+                if (!a.difficulty) return 1;
+                if (!b.difficulty) return -1;
                 return b.difficulty - a.difficulty;
             case 'implementation':
+                // 处理null值：有实现难度的排在前面
+                if (!a.implementation && !b.implementation) return 0;
+                if (!a.implementation) return 1;
+                if (!b.implementation) return -1;
                 return b.implementation - a.implementation;
             case 'priority':
                 // 智能排序：综合考虑截止时间、难度等因素
@@ -1148,26 +1069,46 @@ function renderTasks() {
     });
 
     tasksList.innerHTML = sortedTasks.map(task => {
-        const deadline = new Date(task.deadline);
-        const now = new Date();
-        const isUrgent = deadline <= new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24小时内
-
         const difficultyLabels = ['', '简单', '中等', '困难', '极难'];
         const implementationLabels = ['', '容易实现', '需要研究', '技术挑战', '创新突破'];
+        
+        // 处理截止时间
+        let deadlineHtml = '';
+        let isUrgent = false;
+        if (task.deadline) {
+            const deadline = new Date(task.deadline);
+            const now = new Date();
+            isUrgent = deadline <= new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24小时内
+            deadlineHtml = `
+                <div class="task-deadline ${isUrgent ? 'urgent' : ''}">
+                    截止时间: ${deadline.toLocaleString('zh-CN')}
+                    ${isUrgent ? ' ⚠️ 即将到期' : ''}
+                </div>
+            `;
+        }
+        
+        // 处理标签
+        let badgesHtml = '';
+        if (task.difficulty || task.implementation) {
+            const difficultyBadge = task.difficulty ? 
+                `<span class="badge difficulty-${task.difficulty}">${difficultyLabels[task.difficulty]}</span>` : '';
+            const implementationBadge = task.implementation ? 
+                `<span class="badge implementation-${task.implementation}">${implementationLabels[task.implementation]}</span>` : '';
+            badgesHtml = `
+                <div class="task-badges">
+                    ${difficultyBadge}
+                    ${implementationBadge}
+                </div>
+            `;
+        }
 
         return `
             <div class="task-item ${task.completed ? 'completed' : ''}">
                 <div class="task-header">
                     <div class="task-title">${task.name}</div>
-                    <div class="task-badges">
-                        <span class="badge difficulty-${task.difficulty}">${difficultyLabels[task.difficulty]}</span>
-                        <span class="badge implementation-${task.implementation}">${implementationLabels[task.implementation]}</span>
-                    </div>
+                    ${badgesHtml}
                 </div>
-                <div class="task-deadline ${isUrgent ? 'urgent' : ''}">
-                    截止时间: ${deadline.toLocaleString('zh-CN')}
-                    ${isUrgent ? ' ⚠️ 即将到期' : ''}
-                </div>
+                ${deadlineHtml}
                 <div class="task-actions">
                     <button class="btn ${task.completed ? 'secondary' : 'primary'}" 
                             onclick="toggleTask(${task.id})">
@@ -1184,24 +1125,29 @@ function renderTasks() {
 }
 
 function calculatePriority(task) {
-    const deadline = new Date(task.deadline);
-    const now = new Date();
-    const daysLeft = (deadline - now) / (1000 * 60 * 60 * 24);
-
-    // 优先级计算：时间紧迫性 + 难度 + 实现复杂度
     let priority = 0;
 
     // 时间因素（时间越少优先级越高）
-    if (daysLeft < 1) priority += 100;
-    else if (daysLeft < 3) priority += 50;
-    else if (daysLeft < 7) priority += 25;
-    else priority += Math.max(0, 20 - daysLeft);
+    if (task.deadline) {
+        const deadline = new Date(task.deadline);
+        const now = new Date();
+        const daysLeft = (deadline - now) / (1000 * 60 * 60 * 24);
+        
+        if (daysLeft < 1) priority += 100;
+        else if (daysLeft < 3) priority += 50;
+        else if (daysLeft < 7) priority += 25;
+        else priority += Math.max(0, 20 - daysLeft);
+    }
 
     // 难度因素
-    priority += task.difficulty * 10;
+    if (task.difficulty) {
+        priority += task.difficulty * 10;
+    }
 
     // 实现复杂度因素
-    priority += task.implementation * 5;
+    if (task.implementation) {
+        priority += task.implementation * 5;
+    }
 
     return priority;
 }
@@ -2194,4 +2140,244 @@ window.addEventListener('resize', () => {
             }
         }
     }, 250);
-}); 
+});
+
+// ===== 周报生成功能 =====
+
+// DeepSeek API代理配置（安全）
+// 注意：请将下面的URL替换为您实际的Cloudflare Worker URL
+const DEEPSEEK_PROXY_URL = 'https://deepseek-api-proxy.1652170529.workers.dev/';
+
+// 打开周报生成弹窗
+function openReportModal() {
+    const modal = document.getElementById('report-modal');
+    const taskSelectionList = document.getElementById('task-selection-list');
+    
+    // 如果没有任务，显示提示
+    if (tasks.length === 0) {
+        showNotification('暂无任务，请先添加一些工作任务', 'info');
+        return;
+    }
+    
+    // 生成任务选择列表
+    taskSelectionList.innerHTML = tasks.map(task => {
+        const deadline = new Date(task.deadline);
+        const difficultyLabels = ['', '简单', '中等', '困难', '极难'];
+        const implementationLabels = ['', '容易实现', '需要研究', '技术挑战', '创新突破'];
+        
+        return `
+            <div class="task-selection-item">
+                <input type="checkbox" id="task-${task.id}" value="${task.id}" ${task.completed ? 'checked' : ''}>
+                <div class="task-selection-info">
+                    <div class="task-selection-name">${task.name}</div>
+                    <div class="task-selection-meta">
+                        <span>状态: ${task.completed ? '已完成' : '进行中'}</span>
+                        <span>难度: ${difficultyLabels[task.difficulty]}</span>
+                        <span>截止: ${deadline.toLocaleDateString('zh-CN')}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // 显示弹窗
+    modal.style.display = 'flex';
+    
+    // 重置到第一步
+    showReportStep('task-selection-step');
+}
+
+// 显示指定的周报步骤
+function showReportStep(stepId) {
+    const steps = ['task-selection-step', 'report-generation-step', 'report-result-step'];
+    steps.forEach(id => {
+        const step = document.getElementById(id);
+        if (step) {
+            step.style.display = id === stepId ? 'block' : 'none';
+        }
+    });
+}
+
+// 关闭周报弹窗
+function closeReportModal() {
+    const modal = document.getElementById('report-modal');
+    modal.style.display = 'none';
+    showReportStep('task-selection-step');
+}
+
+// 生成周报
+async function generateWeeklyReport() {
+    // 获取选中的任务
+    const checkboxes = document.querySelectorAll('#task-selection-list input[type="checkbox"]:checked');
+    const selectedTaskIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (selectedTaskIds.length === 0) {
+        showNotification('请至少选择一个任务', 'warning');
+        return;
+    }
+    
+    // 获取选中的任务详情
+    const selectedTasks = tasks.filter(task => selectedTaskIds.includes(task.id.toString()));
+    
+    // 显示生成中状态
+    showReportStep('report-generation-step');
+    
+    try {
+        // 构建提示词
+        const prompt = buildReportPrompt(selectedTasks);
+        
+        // 调用DeepSeek API
+        const report = await callDeepSeekAPI(prompt);
+        
+        // 显示结果
+        document.getElementById('generated-report').value = report;
+        showReportStep('report-result-step');
+        
+        showNotification('周报生成成功！', 'success');
+    } catch (error) {
+        console.error('生成周报失败:', error);
+        showNotification('生成周报失败: ' + error.message, 'error');
+        showReportStep('task-selection-step');
+    }
+}
+
+// 构建周报生成提示词
+function buildReportPrompt(selectedTasks) {
+    const completedTasks = selectedTasks.filter(task => task.completed);
+    const inProgressTasks = selectedTasks.filter(task => !task.completed);
+    
+    let taskDetails = '';
+    
+    if (completedTasks.length > 0) {
+        taskDetails += '已完成的任务:\n';
+        completedTasks.forEach((task, index) => {
+            const difficultyLabels = ['', '简单', '中等', '困难', '极难'];
+            taskDetails += `${index + 1}. ${task.name} (难度: ${difficultyLabels[task.difficulty]})\n`;
+        });
+        taskDetails += '\n';
+    }
+    
+    if (inProgressTasks.length > 0) {
+        taskDetails += '进行中的任务:\n';
+        inProgressTasks.forEach((task, index) => {
+            const difficultyLabels = ['', '简单', '中等', '困难', '极难'];
+            const deadline = new Date(task.deadline);
+            taskDetails += `${index + 1}. ${task.name} (难度: ${difficultyLabels[task.difficulty]}, 截止: ${deadline.toLocaleDateString('zh-CN')})\n`;
+        });
+    }
+    
+    return `请根据以下工作任务信息，生成一份专业的周报，格式要求如下：
+
+**周报格式要求：**
+1. 本周进展
+   - 完成了xx工作 (列出已完成的具体工作)
+2. 本周未完成  
+   - 项目a已完成xx，待完成xx，当前进度xx%
+   - 项目b已完成xx，待完成xx，当前进度xx%
+3. 下周规划
+   - 完成xx工作
+   - 完成xx工作
+
+**工作任务数据：**
+${taskDetails}
+
+**生成要求：**
+- 语言要专业、简洁
+- 根据任务难度合理评估进度百分比
+- 未完成任务的进度估算要现实合理
+- 下周规划要基于当前未完成的任务
+- 使用中文输出
+- 不要添加额外的标题或说明文字，直接输出周报内容`;
+}
+
+// 调用DeepSeek API（通过安全代理）
+async function callDeepSeekAPI(prompt) {
+    const response = await fetch(DEEPSEEK_PROXY_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            messages: [
+                {
+                    role: 'user',
+                    content: prompt
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 2000
+        })
+    });
+    
+    if (!response.ok) {
+        let errorMessage = `请求失败: ${response.status} ${response.statusText}`;
+        try {
+            const errorData = await response.json();
+            if (errorData.error?.message) {
+                errorMessage += `. ${errorData.error.message}`;
+            }
+        } catch (e) {
+            // 忽略解析错误
+        }
+        throw new Error(errorMessage);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        throw new Error('API返回数据格式错误');
+    }
+    
+    return data.choices[0].message.content.trim();
+}
+
+// 复制周报内容
+function copyReportContent() {
+    const reportTextarea = document.getElementById('generated-report');
+    reportTextarea.select();
+    document.execCommand('copy');
+    showNotification('周报内容已复制到剪贴板', 'success');
+}
+
+// 全选任务
+function selectAllTasks() {
+    const checkboxes = document.querySelectorAll('#task-selection-list input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    showNotification(`已选择所有 ${checkboxes.length} 个任务`, 'info');
+}
+
+// 取消全选任务
+function deselectAllTasks() {
+    const checkboxes = document.querySelectorAll('#task-selection-list input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    showNotification(`已取消选择所有任务`, 'info');
+}
+
+// 初始化周报弹窗事件监听器
+function initReportModal() {
+    // 关闭弹窗
+    document.getElementById('close-report-modal').addEventListener('click', closeReportModal);
+    document.getElementById('cancel-report-btn').addEventListener('click', closeReportModal);
+    document.getElementById('close-result-btn').addEventListener('click', closeReportModal);
+    
+    // 生成周报
+    document.getElementById('generate-report-submit-btn').addEventListener('click', generateWeeklyReport);
+    
+    // 复制周报
+    document.getElementById('copy-report-btn').addEventListener('click', copyReportContent);
+    
+    // 全选和取消全选
+    document.getElementById('select-all-tasks-btn').addEventListener('click', selectAllTasks);
+    document.getElementById('deselect-all-tasks-btn').addEventListener('click', deselectAllTasks);
+    
+    // 点击弹窗外部关闭
+    document.getElementById('report-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'report-modal') {
+            closeReportModal();
+        }
+    });
+} 
