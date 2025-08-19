@@ -10,6 +10,7 @@ let notes = [];
 let currentNote = null;
 let nextNoteId = 1;
 let searchQuery = '';
+let sidebarCollapsed = false;
 
 // DOM加载完成后初始化
 document.addEventListener('DOMContentLoaded', function () {
@@ -1123,8 +1124,79 @@ function calculatePriority(task) {
 // 初始化书签管理功能
 function initBookmarks() {
     const bookmarkForm = document.getElementById('bookmark-form');
+    const quickAddBookmarkBtn = document.getElementById('quick-add-bookmark-btn');
+    const colorPresets = document.querySelectorAll('.color-preset');
+    const bookmarkColorInput = document.getElementById('bookmark-color');
 
     bookmarkForm.addEventListener('submit', addBookmark);
+    
+    // 快速添加按钮功能 - 显示/隐藏书签添加表单
+    quickAddBookmarkBtn.addEventListener('click', () => {
+        const addBookmarkSection = document.getElementById('add-bookmark-section');
+        const isHidden = addBookmarkSection.style.display === 'none';
+
+        // 切换表单显示状态
+        if (isHidden) {
+            // 显示表单
+            addBookmarkSection.style.display = 'block';
+
+            // 添加动画效果
+            addBookmarkSection.style.opacity = '0';
+            addBookmarkSection.style.transform = 'translateY(-20px)';
+
+            setTimeout(() => {
+                addBookmarkSection.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                addBookmarkSection.style.opacity = '1';
+                addBookmarkSection.style.transform = 'translateY(0)';
+
+                // 聚焦到网站名称输入框
+                const bookmarkNameInput = document.getElementById('bookmark-name');
+                bookmarkNameInput.focus();
+            }, 10);
+
+            // 更改按钮图标为减号
+            quickAddBookmarkBtn.innerHTML = '➖';
+            quickAddBookmarkBtn.title = '隐藏添加表单';
+        } else {
+            // 隐藏表单
+            addBookmarkSection.style.opacity = '0';
+            addBookmarkSection.style.transform = 'translateY(-20px)';
+
+            setTimeout(() => {
+                addBookmarkSection.style.display = 'none';
+                addBookmarkSection.style.transition = '';
+            }, 300);
+
+            // 恢复按钮图标为加号
+            quickAddBookmarkBtn.innerHTML = '➕';
+            quickAddBookmarkBtn.title = '快速添加网站';
+        }
+    });
+
+    // 预设颜色选择功能
+    colorPresets.forEach(preset => {
+        preset.addEventListener('click', () => {
+            // 移除其他预设颜色的active状态
+            colorPresets.forEach(p => p.classList.remove('active'));
+            
+            // 设置当前选中的颜色
+            preset.classList.add('active');
+            const selectedColor = preset.dataset.color;
+            bookmarkColorInput.value = selectedColor;
+            
+            showNotification(`已选择${preset.title}`, 'info');
+        });
+    });
+
+    // 自定义颜色选择时，清除预设颜色的选中状态
+    bookmarkColorInput.addEventListener('change', () => {
+        colorPresets.forEach(p => p.classList.remove('active'));
+    });
+
+    // 默认选中第一个预设颜色（蓝色）
+    if (colorPresets.length > 0) {
+        colorPresets[0].classList.add('active');
+    }
 
     function addBookmark(e) {
         e.preventDefault();
@@ -1152,6 +1224,30 @@ function initBookmarks() {
         renderBookmarks();
         bookmarkForm.reset();
         document.getElementById('bookmark-color').value = '#3498db'; // 重置颜色
+        
+        // 重置预设颜色选择状态
+        const colorPresets = document.querySelectorAll('.color-preset');
+        colorPresets.forEach(p => p.classList.remove('active'));
+        if (colorPresets.length > 0) {
+            colorPresets[0].classList.add('active'); // 默认选中蓝色
+        }
+        
+        // 隐藏添加表单
+        const addBookmarkSection = document.getElementById('add-bookmark-section');
+        const quickAddBookmarkBtn = document.getElementById('quick-add-bookmark-btn');
+        
+        addBookmarkSection.style.opacity = '0';
+        addBookmarkSection.style.transform = 'translateY(-20px)';
+        
+        setTimeout(() => {
+            addBookmarkSection.style.display = 'none';
+            addBookmarkSection.style.transition = '';
+        }, 300);
+        
+        // 恢复按钮图标
+        quickAddBookmarkBtn.innerHTML = '➕';
+        quickAddBookmarkBtn.title = '快速添加网站';
+        
         showNotification('网站已添加', 'success');
     }
 
@@ -1173,7 +1269,7 @@ function initNotebook() {
     const addNoteBtn = document.getElementById('add-note-btn');
     const exportNotesBtn = document.getElementById('export-notes-btn');
     const noteSearch = document.getElementById('note-search');
-    const clearSearchBtn = document.getElementById('clear-search-btn');
+    const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
     const saveNoteBtn = document.getElementById('save-note-btn');
     const deleteNoteBtn = document.getElementById('delete-note-btn');
     const noteTitle = document.getElementById('note-title');
@@ -1185,10 +1281,10 @@ function initNotebook() {
     exportNotesBtn.addEventListener('click', exportNotes);
     saveNoteBtn.addEventListener('click', saveCurrentNote);
     deleteNoteBtn.addEventListener('click', deleteCurrentNote);
+    toggleSidebarBtn.addEventListener('click', toggleSidebar);
 
     // 搜索功能
     noteSearch.addEventListener('input', handleSearch);
-    clearSearchBtn.addEventListener('click', clearSearch);
 
     // 标题和内容自动保存
     noteTitle.addEventListener('input', () => {
@@ -1317,11 +1413,27 @@ function handleSearch() {
     renderNotesList();
 }
 
-// 清除搜索
-function clearSearch() {
-    document.getElementById('note-search').value = '';
-    searchQuery = '';
-    renderNotesList();
+// 切换侧边栏显示/隐藏
+function toggleSidebar() {
+    const sidebar = document.getElementById('notebook-sidebar');
+    const toggleBtn = document.getElementById('toggle-sidebar-btn');
+    
+    sidebarCollapsed = !sidebarCollapsed;
+    
+    if (sidebarCollapsed) {
+        sidebar.classList.add('collapsed');
+        toggleBtn.innerHTML = '📖 展开';
+        toggleBtn.title = '展开笔记列表';
+        showNotification('笔记列表已折叠，获得更多编辑空间', 'info');
+    } else {
+        sidebar.classList.remove('collapsed');
+        toggleBtn.innerHTML = '📋 列表';
+        toggleBtn.title = '折叠笔记列表';
+        showNotification('笔记列表已展开', 'info');
+    }
+    
+    // 保存状态
+    saveData();
 }
 
 // 渲染笔记列表
@@ -1502,7 +1614,8 @@ function saveData() {
         // 笔记本数据
         notes,
         nextNoteId,
-        currentNoteId: currentNote ? currentNote.id : null
+        currentNoteId: currentNote ? currentNote.id : null,
+        sidebarCollapsed
     };
     localStorage.setItem('toolbox-data', JSON.stringify(data));
 }
@@ -1593,6 +1706,27 @@ function loadData() {
                     selectNote(currentNote);
                 }, 300);
             }
+        }
+
+        // 恢复侧边栏状态
+        if (data.sidebarCollapsed !== undefined) {
+            sidebarCollapsed = data.sidebarCollapsed;
+            // 延迟应用状态，确保DOM已加载
+            setTimeout(() => {
+                const sidebar = document.getElementById('notebook-sidebar');
+                const toggleBtn = document.getElementById('toggle-sidebar-btn');
+                if (sidebar && toggleBtn) {
+                    if (sidebarCollapsed) {
+                        sidebar.classList.add('collapsed');
+                        toggleBtn.innerHTML = '📖 展开';
+                        toggleBtn.title = '展开笔记列表';
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        toggleBtn.innerHTML = '📋 列表';
+                        toggleBtn.title = '折叠笔记列表';
+                    }
+                }
+            }, 100);
         }
 
         renderTasks();

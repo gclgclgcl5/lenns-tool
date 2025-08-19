@@ -185,9 +185,11 @@
                                         <small>任务将自动设置为中等难度，截止时间为明天</small>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn primary">
-                                    ➕ 添加任务
-                                </button>
+                                <div class="task-form-actions">
+                                    <button type="submit" class="btn primary">
+                                        ➕ 添加任务
+                                    </button>
+                                </div>
                             </form>
                         </div>
                         <div class="sorting-options">
@@ -207,9 +209,17 @@
             <!-- 网站收藏区域 -->
             <div class="function-area bookmarks-area">
                 <div class="card bookmarks-card">
-                    <h2>🔖 网站收藏</h2>
+                    <div class="bookmarks-header">
+                        <h2>🔖 网站收藏</h2>
+                        <div class="bookmark-controls">
+                            <button id="quick-add-bookmark-btn" class="quick-add-btn" title="快速添加网站">
+                                ➕
+                            </button>
+                        </div>
+                    </div>
                     <div class="bookmarks-container">
-                        <div class="add-bookmark-section">
+                        <div class="add-bookmark-section" id="add-bookmark-section" style="display: none;">
+                            <h3>添加新网站</h3>
                             <form id="bookmark-form">
                                 <div class="form-row">
                                     <div class="form-group">
@@ -219,15 +229,25 @@
                                         <input type="url" id="bookmark-url" placeholder="网站地址" required>
                                     </div>
                                 </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <input type="color" id="bookmark-color" value="#3498db" title="按钮颜色">
+                                <div class="form-group color-selection-group">
+                                    <label>选择颜色:</label>
+                                    <div class="color-options">
+                                        <button type="button" class="color-preset" data-color="#3498db" style="background-color: #3498db" title="蓝色"></button>
+                                        <button type="button" class="color-preset" data-color="#e74c3c" style="background-color: #e74c3c" title="红色"></button>
+                                        <button type="button" class="color-preset" data-color="#2ecc71" style="background-color: #2ecc71" title="绿色"></button>
+                                        <button type="button" class="color-preset" data-color="#f39c12" style="background-color: #f39c12" title="橙色"></button>
+                                        <button type="button" class="color-preset" data-color="#9b59b6" style="background-color: #9b59b6" title="紫色"></button>
+                                        <button type="button" class="color-preset" data-color="#1abc9c" style="background-color: #1abc9c" title="青色"></button>
+                                        <button type="button" class="color-preset" data-color="#34495e" style="background-color: #34495e" title="深灰"></button>
+                                        <div class="custom-color">
+                                            <input type="color" id="bookmark-color" value="#3498db" title="自定义颜色">
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <button type="submit" class="btn primary">
-                                            ➕ 添加
-                                        </button>
-                                    </div>
+                                </div>
+                                <div class="bookmark-form-actions">
+                                    <button type="submit" class="btn primary add-bookmark-btn">
+                                        ➕ 添加
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -241,29 +261,27 @@
             <!-- 笔记本工具区域 -->
             <div class="function-area notebook-area">
                 <div class="card notebook-card">
-                    <h2>📔 笔记本</h2>
+                    <div class="notebook-header">
+                        <h2>📔 笔记本</h2>
+                        <div class="notebook-header-controls">
+                            <input type="text" id="note-search" placeholder="搜索笔记..." class="note-search-compact">
+                            <button id="add-note-btn" class="btn compact primary" title="新建笔记">
+                                ➕ 新建
+                            </button>
+                            <button id="export-notes-btn" class="btn compact secondary" title="导出笔记">
+                                📥 导出
+                            </button>
+                            <button id="toggle-sidebar-btn" class="btn compact secondary" title="折叠/展开笔记列表">
+                                📋 列表
+                            </button>
+                        </div>
+                    </div>
                     <div class="notebook-container">
-                        <div class="notebook-sidebar">
-                            <div class="notebook-controls">
-                                <div class="search-section">
-                                    <input type="text" id="note-search" placeholder="搜索笔记..." class="note-search">
-                                    <button id="clear-search-btn" class="btn small secondary">
-                                        ✖️
-                                    </button>
-                                </div>
-                                <div class="notebook-actions">
-                                    <button id="add-note-btn" class="btn primary">
-                                        ➕ 新建笔记
-                                    </button>
-                                    <button id="export-notes-btn" class="btn secondary">
-                                        📥 导出
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="notebook-sidebar" id="notebook-sidebar">
                             <div class="notes-list" id="notes-list">
                                 <div class="empty-notes">
                                     📝
-                                    <p>暂无笔记<br>点击"新建笔记"开始</p>
+                                    <p>暂无笔记<br>点击"➕"开始</p>
                                 </div>
                             </div>
                         </div>
@@ -290,12 +308,13 @@
                             <div class="note-welcome" id="note-welcome">
                                 ✏️
                                 <h3>欢迎使用笔记本</h3>
-                                <p>选择左侧的笔记进行编辑，或创建新的笔记</p>
+                                <p>点击左上角 ➕ 创建新笔记</p>
                                 <ul>
                                     <li>📝 支持富文本编辑</li>
                                     <li>🔍 快速搜索功能</li>
                                     <li>💾 自动本地保存</li>
                                     <li>📥 一键导出下载</li>
+                                    <li>📋 可折叠笔记列表</li>
                                 </ul>
                             </div>
                         </div>
