@@ -543,34 +543,34 @@ function initOCR() {
     checkOCRStatus();
 
     async function checkOCRStatus() {
-        const ocrStatusText = document.getElementById('ocr-status-text');
-        if (!ocrStatusText) return;
-
-        ocrStatusText.innerHTML = '⏳ 检查OCR引擎状态...';
+        console.log('🔍 OCR状态: 开始检查OCR引擎状态...');
 
         try {
             const isLoaded = await checkTesseractLoaded();
             if (isLoaded) {
-                ocrStatusText.innerHTML = '✅ OCR引擎已就绪';
+                console.log('✅ OCR状态: OCR引擎已就绪');
 
                 // 尝试预加载worker以确保真正可用
                 try {
-                    ocrStatusText.innerHTML = '⏳ 预热OCR引擎...';
+                    console.log('⏳ OCR状态: 正在预热OCR引擎...');
                     const testWorker = await Tesseract.createWorker({
                         logger: () => { } // 静默日志
                     });
                     await testWorker.terminate();
-                    ocrStatusText.innerHTML = '✅ OCR引擎预热完成，可以使用';
+                    console.log('🚀 OCR状态: OCR引擎预热完成，可以使用');
+                    showNotification('OCR引擎已就绪', 'success');
                 } catch (preloadError) {
                     console.warn('OCR预加载失败:', preloadError);
-                    ocrStatusText.innerHTML = '✅ OCR引擎已加载（需要网络连接）';
+                    console.log('✅ OCR状态: OCR引擎已加载（需要网络连接）');
+                    showNotification('OCR引擎已就绪（需要网络连接）', 'info');
                 }
             } else {
-                ocrStatusText.innerHTML = '⚠️ OCR引擎未加载，请检查网络连接';
+                console.warn('⚠️ OCR状态: OCR引擎未加载，请检查网络连接');
+                showNotification('OCR引擎未加载，请检查网络连接', 'warning');
             }
         } catch (error) {
             console.error('OCR状态检查失败:', error);
-            ocrStatusText.innerHTML = '❌ OCR引擎检查失败，请刷新页面';
+            console.error('❌ OCR状态: OCR引擎检查失败，请刷新页面');
         }
     }
 
@@ -613,6 +613,7 @@ function initOCR() {
                 throw new Error('OCR库未加载，请检查网络连接');
             }
 
+            console.log('🔄 OCR: 正在初始化文字识别引擎...');
             showNotification('正在初始化文字识别引擎...', 'info');
 
             // 使用简化的Worker创建方式
