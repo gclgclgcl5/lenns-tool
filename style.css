@@ -607,9 +607,9 @@ textarea {
 .tasks-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: baseline; /* 改为基线对齐 */
     margin-bottom: 15px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 15px;
 }
 
@@ -620,46 +620,47 @@ textarea {
 
 .tasks-header-controls {
     display: flex;
-    align-items: center;
+    align-items: baseline; /* 改为基线对齐 */
     gap: 15px;
-    flex-wrap: wrap;
-    height: 38px; /* 固定高度确保对齐 */
+    flex-wrap: nowrap;
+    flex-shrink: 0; /* 防止压缩 */
 }
 
 /* 任务按钮容器 */
 .task-buttons {
     display: flex;
-    align-items: center;
+    align-items: baseline; /* 改为基线对齐 */
     gap: 8px;
-    height: 100%; /* 使用父元素的高度 */
 }
 
 /* 生成周报按钮样式 */
 .generate-report-btn {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
-    border: none;
+    border: 1px solid transparent; /* 统一边框处理 */
     border-radius: 16px;
     padding: 0 14px;
     height: 32px; /* 固定高度与排序按钮一致 */
     font-size: 14px;
     font-weight: 500;
+    line-height: 1;
     cursor: pointer;
-    display: flex;
+    display: inline-flex; /* 改为inline-flex */
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-sizing: border-box;
+    vertical-align: baseline; /* 明确基线对齐 */
 }
 
 .generate-report-btn:hover {
-    transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     background: linear-gradient(135deg, #764ba2, #667eea);
 }
 
 .generate-report-btn:active {
-    transform: translateY(0) scale(0.95);
+    transform: scale(0.98);
 }
 
 
@@ -689,28 +690,30 @@ textarea {
 .quick-add-btn {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
-    border: none;
+    border: 1px solid transparent; /* 统一边框处理 */
     border-radius: 50%;
     width: 32px;
     height: 32px;
     font-size: 16px;
+    line-height: 1;
     cursor: pointer;
-    display: flex;
+    display: inline-flex; /* 改为inline-flex */
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
     flex-shrink: 0;
+    box-sizing: border-box;
+    vertical-align: baseline; /* 明确基线对齐 */
 }
 
 .quick-add-btn:hover {
-    transform: translateY(-2px) scale(1.1);
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     background: linear-gradient(135deg, #764ba2, #667eea);
 }
 
 .quick-add-btn:active {
-    transform: translateY(0) scale(0.95);
+    transform: scale(0.98);
 }
 
 /* 任务列表样式 */
@@ -799,30 +802,49 @@ textarea {
 
 .sorting-options {
     display: flex;
-    align-items: center;
+    align-items: baseline; /* 改为基线对齐 */
     gap: 8px;
     flex-wrap: wrap;
-    height: 100%; /* 使用父元素的高度 */
 }
 
 .sorting-options label {
     color: #333;
     font-weight: 500;
-    font-size: 0.85rem;
+    font-size: 14px;
     margin: 0 3px 0 0;
     white-space: nowrap;
+    line-height: 32px; /* 与按钮高度一致 */
+    display: inline-block; /* 改为inline-block */
+    vertical-align: baseline; /* 明确基线对齐 */
 }
 
 .sort-btn {
     height: 32px; /* 固定高度与生成周报按钮一致 */
-    display: flex;
+    display: inline-flex; /* 改为inline-flex */
     align-items: center;
+    justify-content: center;
     padding: 0 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1;
+    box-sizing: border-box;
+    border: 1px solid #e9ecef; /* 统一边框 */
+    background: #f8f9fa;
+    color: #667eea;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    vertical-align: baseline; /* 明确基线对齐 */
+}
+
+.sort-btn:hover {
+    background: #e9ecef;
+    border-color: #dee2e6;
 }
 
 .sort-btn.active {
     background: #667eea;
     color: white;
+    border-color: #667eea;
 }
 
 .tasks-list {
@@ -2391,15 +2413,14 @@ textarea {
     }
     
     .tasks-header {
-        flex-direction: column;
+        flex-wrap: wrap;
         align-items: flex-start;
-        gap: 10px;
     }
     
     .tasks-header-controls {
+        flex-wrap: wrap;
         width: 100%;
-        justify-content: space-between;
-        flex-direction: row;
+        justify-content: flex-end;
     }
     
     .sorting-options {
@@ -2424,5 +2445,33 @@ textarea {
     .task-selection-controls .btn.small {
         padding: 6px 12px;
         font-size: 0.8rem;
+    }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 480px) {
+    .tasks-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .tasks-header h2 {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    
+    .tasks-header-controls {
+        justify-content: center;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .sorting-options {
+        justify-content: center;
+    }
+    
+    .task-buttons {
+        justify-content: center;
     }
 }
