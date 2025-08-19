@@ -294,6 +294,9 @@ function initTranslator() {
             return;
         }
 
+        console.log(`🌐 翻译请求: ${from} -> ${to}, 文本长度: ${text.length} 字符`);
+        console.log(`📝 原文内容:`, text.substring(0, 100) + (text.length > 100 ? '...' : ''));
+
         translateBtn.disabled = true;
         translateBtn.innerHTML = '<div class="loading"></div> 翻译中...';
 
@@ -303,15 +306,18 @@ function initTranslator() {
 
             if (translatedText) {
                 targetText.value = translatedText;
+                console.log(`🎉 翻译完成: 译文长度 ${translatedText.length} 字符`);
+                console.log(`📖 译文内容:`, translatedText.substring(0, 100) + (translatedText.length > 100 ? '...' : ''));
                 showNotification('翻译完成', 'success');
             } else {
                 throw new Error('所有翻译服务都不可用');
             }
         } catch (error) {
-            console.error('Translation error:', error);
+            console.error('❌ 翻译错误:', error);
             // 备用本地翻译逻辑
             const localTranslation = getLocalTranslation(text, from, to);
             targetText.value = localTranslation;
+            console.log(`🔄 使用本地词典翻译:`, localTranslation);
             showNotification('网络翻译不可用，使用了本地词典', 'info');
         }
 
@@ -325,13 +331,20 @@ function initTranslator() {
             async () => {
                 const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`);
                 const data = await response.json();
-                return data[0][0][0];
+                // 合并所有翻译片段
+                if (data && data[0] && Array.isArray(data[0])) {
+                    return data[0].map(item => item[0]).filter(Boolean).join('');
+                }
+                return data[0][0][0]; // 备用方案
             },
             // MyMemory API
             async () => {
                 const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`);
                 const data = await response.json();
-                return data.responseData.translatedText;
+                if (data && data.responseData && data.responseData.translatedText) {
+                    return data.responseData.translatedText;
+                }
+                throw new Error('MyMemory API返回无效数据');
             },
             // Libre Translate (公共实例)
             async () => {
@@ -346,21 +359,28 @@ function initTranslator() {
                     })
                 });
                 const data = await response.json();
-                return data.translatedText;
+                if (data && data.translatedText) {
+                    return data.translatedText;
+                }
+                throw new Error('LibreTranslate API返回无效数据');
             }
         ];
 
-        for (const api of APIs) {
+        for (let i = 0; i < APIs.length; i++) {
+            const apiNames = ['Google Translate', 'MyMemory', 'LibreTranslate'];
             try {
+                console.log(`🔄 翻译: 尝试使用 ${apiNames[i]} API...`);
                 const result = await Promise.race([
-                    api(),
+                    APIs[i](),
                     new Promise((_, reject) => setTimeout(() => reject(new Error('超时')), 5000))
                 ]);
                 if (result && result.trim()) {
+                    console.log(`✅ 翻译: ${apiNames[i]} API 翻译成功`);
                     return result;
                 }
+                console.warn(`⚠️ 翻译: ${apiNames[i]} API 返回空结果`);
             } catch (error) {
-                console.log('API failed, trying next:', error);
+                console.warn(`❌ 翻译: ${apiNames[i]} API 失败:`, error.message);
                 continue;
             }
         }
