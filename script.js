@@ -1045,7 +1045,22 @@ function renderTasks() {
                 if (!a.deadline && !b.deadline) return 0;
                 if (!a.deadline) return 1;
                 if (!b.deadline) return -1;
-                return new Date(a.deadline) - new Date(b.deadline);
+                
+                // 检查日期是否有效
+                const aDate = new Date(a.deadline);
+                const bDate = new Date(b.deadline);
+                
+                // 如果日期是1970/1971年，视为无效
+                if (aDate.getFullYear() <= 1971) {
+                    a.deadline = null;
+                    return 1;
+                }
+                if (bDate.getFullYear() <= 1971) {
+                    b.deadline = null;
+                    return -1;
+                }
+                
+                return aDate - bDate;
             case 'difficulty':
                 // 处理null值：有难度的排在前面
                 if (!a.difficulty && !b.difficulty) return 0;
@@ -1077,14 +1092,20 @@ function renderTasks() {
         let isUrgent = false;
         if (task.deadline) {
             const deadline = new Date(task.deadline);
-            const now = new Date();
-            isUrgent = deadline <= new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24小时内
-            deadlineHtml = `
-                <div class="task-deadline ${isUrgent ? 'urgent' : ''}">
-                    截止时间: ${deadline.toLocaleString('zh-CN')}
-                    ${isUrgent ? ' ⚠️ 即将到期' : ''}
-                </div>
-            `;
+            // 检查日期是否有效（不是1970/1971年）
+            if (deadline.getFullYear() > 1971) {
+                const now = new Date();
+                isUrgent = deadline <= new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24小时内
+                deadlineHtml = `
+                    <div class="task-deadline ${isUrgent ? 'urgent' : ''}">
+                        截止时间: ${deadline.toLocaleString('zh-CN')}
+                        ${isUrgent ? ' ⚠️ 即将到期' : ''}
+                    </div>
+                `;
+            } else {
+                // 如果日期无效，不显示截止时间
+                task.deadline = null;
+            }
         }
         
         // 处理标签
@@ -1130,13 +1151,19 @@ function calculatePriority(task) {
     // 时间因素（时间越少优先级越高）
     if (task.deadline) {
         const deadline = new Date(task.deadline);
-        const now = new Date();
-        const daysLeft = (deadline - now) / (1000 * 60 * 60 * 24);
-        
-        if (daysLeft < 1) priority += 100;
-        else if (daysLeft < 3) priority += 50;
-        else if (daysLeft < 7) priority += 25;
-        else priority += Math.max(0, 20 - daysLeft);
+        // 检查日期是否有效（不是1970/1971年）
+        if (deadline.getFullYear() > 1971) {
+            const now = new Date();
+            const daysLeft = (deadline - now) / (1000 * 60 * 60 * 24);
+            
+            if (daysLeft < 1) priority += 100;
+            else if (daysLeft < 3) priority += 50;
+            else if (daysLeft < 7) priority += 25;
+            else priority += Math.max(0, 20 - daysLeft);
+        } else {
+            // 如果日期无效，不考虑时间因素
+            task.deadline = null;
+        }
     }
 
     // 难度因素
@@ -1675,8 +1702,12 @@ function loadData() {
         if (data.tasks) {
             tasks = data.tasks.map(task => ({
                 ...task,
-                deadline: new Date(task.deadline),
-                createdAt: new Date(task.createdAt)
+                deadline: task.deadline ? (
+                    new Date(task.deadline).getFullYear() > 1971 ? 
+                    new Date(task.deadline) : null
+                ) : null,
+                createdAt: task.createdAt && new Date(task.createdAt).getFullYear() > 1971 ? 
+                          new Date(task.createdAt) : new Date()
             }));
         }
 
@@ -1718,8 +1749,11 @@ function loadData() {
         if (data.notes) {
             notes = data.notes.map(note => ({
                 ...note,
-                createdAt: new Date(note.createdAt),
-                updatedAt: new Date(note.updatedAt)
+                // 确保日期有效，无效时使用当前日期
+                createdAt: note.createdAt && new Date(note.createdAt).getFullYear() > 1971 ? 
+                          new Date(note.createdAt) : new Date(),
+                updatedAt: note.updatedAt && new Date(note.updatedAt).getFullYear() > 1971 ? 
+                          new Date(note.updatedAt) : new Date()
             }));
         }
 
@@ -2018,6 +2052,7 @@ function handleImportConfiguration(event) {
 // 导入配置数据
 function importConfiguration(configData) {
     try {
+        console.log('开始导入配置...');
         // 验证配置数据格式
         if (!configData || typeof configData !== 'object') {
             throw new Error('配置数据格式无效');
@@ -2026,6 +2061,28 @@ function importConfiguration(configData) {
         // 验证是否是有效的导出文件
         if (!configData.exportInfo || !configData.toolboxData) {
             throw new Error('这不是有效的百宝箱配置文件');
+        }
+        
+        // 预处理任务数据中的日期，修复1970年问题
+        if (configData.toolboxData.tasks) {
+            console.log('正在处理任务日期数据...');
+            configData.toolboxData.tasks = configData.toolboxData.tasks.map(task => {
+                // 完全移除无效日期
+                if (task.deadline) {
+                    try {
+                        const deadlineDate = new Date(task.deadline);
+                        console.log(`任务[${task.name}]日期检查: ${deadlineDate.toISOString()}, 年份: ${deadlineDate.getFullYear()}`);
+                        if (deadlineDate.getFullYear() <= 1971) {
+                            console.log(`- 发现无效日期(${deadlineDate.toISOString()}), 已移除`);
+                            task.deadline = null;
+                        }
+                    } catch (e) {
+                        console.error('日期解析错误:', e);
+                        task.deadline = null;
+                    }
+                }
+                return task;
+            });
         }
 
         const confirmMessage = `
@@ -2061,19 +2118,140 @@ function importConfiguration(configData) {
                 localStorage.setItem('layout-order', JSON.stringify(configData.layoutOrder));
             }
 
-            showNotification('配置导入成功！页面将刷新...', 'success');
+            showNotification('配置导入中，请稍候...', 'info');
 
-            // 延迟刷新，让用户看到成功消息
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
+            // 将导入的数据应用到全局变量
+            const data = configData.toolboxData;
+            
+            // 恢复任务
+            if (data.tasks) {
+                console.log(`处理${data.tasks.length}个任务...`);
+                tasks = data.tasks.map(task => {
+                    // 处理截止日期
+                    let processedDeadline = null;
+                    if (task.deadline) {
+                        try {
+                            const deadlineDate = new Date(task.deadline);
+                            if (deadlineDate.getFullYear() > 1971) {
+                                processedDeadline = deadlineDate;
+                                console.log(`- 任务[${task.name}]有效截止日期: ${deadlineDate.toISOString()}`);
+                            } else {
+                                console.log(`- 任务[${task.name}]无效截止日期已移除: ${deadlineDate.toISOString()}`);
+                            }
+                        } catch (e) {
+                            console.error('处理截止日期错误:', e);
+                        }
+                    }
+                    
+                    // 处理创建日期
+                    let processedCreatedAt = new Date();
+                    if (task.createdAt) {
+                        try {
+                            const createdDate = new Date(task.createdAt);
+                            if (createdDate.getFullYear() > 1971) {
+                                processedCreatedAt = createdDate;
+                            }
+                        } catch (e) {
+                            console.error('处理创建日期错误:', e);
+                        }
+                    }
+                    
+                    return {
+                        ...task,
+                        deadline: processedDeadline,
+                        createdAt: processedCreatedAt
+                    };
+                });
+            }
+            
+            // 恢复书签
+            if (data.bookmarks) {
+                bookmarks = data.bookmarks;
+            }
+            
+            // 恢复笔记本数据
+            if (data.notes) {
+                notes = data.notes.map(note => ({
+                    ...note,
+                    // 确保日期有效，无效时使用当前日期
+                    createdAt: note.createdAt && new Date(note.createdAt).getFullYear() > 1971 ? 
+                              new Date(note.createdAt) : new Date(),
+                    updatedAt: note.updatedAt && new Date(note.updatedAt).getFullYear() > 1971 ? 
+                              new Date(note.updatedAt) : new Date()
+                }));
+                nextNoteId = data.nextNoteId || 1;
+                
+                // 恢复当前选中的笔记
+                if (data.currentNoteId && notes.length > 0) {
+                    currentNote = notes.find(note => note.id === data.currentNoteId) || null;
+                }
+            }
+            
+            // 恢复记事本内容和状态
+            const notepad1 = document.getElementById('notepad1');
+            const notepad2 = document.getElementById('notepad2');
+            
+            if (notepad1 && data.notepadContent1) {
+                notepad1.value = data.notepadContent1;
+            }
+            
+            if (notepad2 && data.notepadContent2) {
+                notepad2.value = data.notepadContent2;
+            }
+            
+            // 重新渲染数据
+            renderTasks();
+            renderBookmarks();
+            renderNotesList();
+            
+            if (currentNote) {
+                selectNote(currentNote);
+            }
+            
+            // 应用侧边栏状态
+            if (data.sidebarCollapsed !== undefined) {
+                sidebarCollapsed = data.sidebarCollapsed;
+                const sidebar = document.getElementById('notebook-sidebar');
+                const toggleBtn = document.getElementById('toggle-sidebar-btn');
+                if (sidebar && toggleBtn) {
+                    if (sidebarCollapsed) {
+                        sidebar.classList.add('collapsed');
+                        toggleBtn.innerHTML = '📖 展开';
+                        toggleBtn.title = '展开笔记列表';
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        toggleBtn.innerHTML = '📋 列表';
+                        toggleBtn.title = '折叠笔记列表';
+                    }
+                }
+            }
 
+            // 更新系统信息显示
+            updateSystemInfo();
+            
             // 在控制台显示导入信息
             console.group('📥 配置导入成功');
             console.log('导入时间:', new Date().toISOString());
             console.log('原文件信息:', configData.exportInfo);
             console.log('导入的数据项:', Object.keys(configData));
+            
+            // 显示任务日期信息
+            if (tasks.length > 0) {
+                console.group('任务日期信息');
+                tasks.forEach(task => {
+                    if (task.deadline) {
+                        console.log(`${task.name}: ${task.deadline.toISOString()}`);
+                    } else {
+                        console.log(`${task.name}: 无截止日期`);
+                    }
+                });
+                console.groupEnd();
+            }
+            
             console.groupEnd();
+            
+            // 不再自动刷新页面，避免重新加载导致日期问题
+            showNotification('配置导入成功！数据已加载', 'success');
 
         } catch (importError) {
             // 恢复备份数据

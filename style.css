@@ -1299,7 +1299,7 @@ textarea {
 
     .auto-extract-toggle {
         font-size: 0.8rem;
-    }
+}
 
 /* 表单优化 */
 .form-row {
@@ -1343,11 +1343,11 @@ textarea {
         align-items: center;
     }
 
-    .bookmarks-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        flex-grow: 1;
-    }
+.bookmarks-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex-grow: 1;
+}
 
     .color-options {
         gap: 6px;

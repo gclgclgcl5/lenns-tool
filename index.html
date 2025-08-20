@@ -95,11 +95,11 @@
                 </div>
             </div>
 
-                        <!-- OCR文字提取区域 -->
+            <!-- OCR文字提取区域 -->
             <div class="function-area ocr-area">
                 <div class="card ocr-card">
                     <div class="ocr-header">
-                        <h2>🖼️ 图片文字提取</h2>
+                    <h2>🖼️ 图片文字提取</h2>
                         <div class="ocr-settings">
                             <label class="auto-extract-toggle">
                                 <input type="checkbox" id="auto-extract-checkbox" checked>
@@ -110,32 +110,32 @@
                     <div class="ocr-container">
                         <div class="ocr-input-section">
                             <div class="upload-controls">
-                                <div class="drop-zone" id="drop-zone">
+                            <div class="drop-zone" id="drop-zone">
                                     <div class="drop-zone-content">
                                         <div class="drop-zone-icon">📷</div>
-                                        <p>拖拽图片或点击选择</p>
-                                        <input type="file" id="image-input" accept="image/*" style="display: none;">
+                                <p>拖拽图片或点击选择</p>
+                                <input type="file" id="image-input" accept="image/*" style="display: none;">
                                         <button class="btn primary compact-btn" id="select-image-btn">
                                             📁 选择图片
-                                        </button>
-                                    </div>
+                                </button>
+                            </div>
                                 </div>
                                 <button class="btn secondary compact-btn" id="paste-btn">
                                     📋 粘贴图片
                                 </button>
-                            </div>
-                            <div class="preview-section" id="preview-section" style="display: none;">
+                        </div>
+                        <div class="preview-section" id="preview-section" style="display: none;">
                                 <div class="image-preview-container">
-                                    <img id="preview-image" alt="预览图片">
+                            <img id="preview-image" alt="预览图片">
                                 </div>
-                                <button class="btn primary" id="extract-text-btn">
-                                    ✨ 提取文字
-                                </button>
+                            <button class="btn primary" id="extract-text-btn">
+                                ✨ 提取文字
+                            </button>
                             </div>
                         </div>
                         <div class="ocr-result-section">
                             <div class="result-header">
-                                <label for="extracted-text">提取的文字:</label>
+                            <label for="extracted-text">提取的文字:</label>
                                 <button class="btn secondary small" id="copy-text-btn" style="display: none;">
                                     📄 复制
                                 </button>
@@ -159,13 +159,13 @@
                                 <button class="btn secondary sort-btn" data-sort="implementation">实现</button>
                                 <button class="btn secondary sort-btn" data-sort="priority">智能</button>
                             </div>
-                            <div class="task-buttons">
+                        <div class="task-buttons">
                                 <button id="generate-report-btn" class="generate-report-btn" title="一键生成周报">
                                     📝 生成周报
-                                </button>
-                                <button id="quick-add-task-btn" class="quick-add-btn" title="快速添加任务">
-                                    ➕
-                                </button>
+                            </button>
+                            <button id="quick-add-task-btn" class="quick-add-btn" title="快速添加任务">
+                                ➕
+                            </button>
                             </div>
                         </div>
                     </div>
@@ -201,9 +201,9 @@
                                     </div>
                                 </div>
                                 <div class="task-form-actions">
-                                    <button type="submit" class="btn primary">
-                                        ➕ 添加任务
-                                    </button>
+                                <button type="submit" class="btn primary">
+                                    ➕ 添加任务
+                                </button>
                                 </div>
                             </form>
                         </div>
@@ -219,7 +219,7 @@
             <div class="function-area bookmarks-area">
                 <div class="card bookmarks-card">
                     <div class="bookmarks-header">
-                        <h2>🔖 网站收藏</h2>
+                    <h2>🔖 网站收藏</h2>
                         <div class="bookmark-controls">
                             <button id="quick-add-bookmark-btn" class="quick-add-btn" title="快速添加网站">
                                 ➕
@@ -255,8 +255,8 @@
                                 </div>
                                 <div class="bookmark-form-actions">
                                     <button type="submit" class="btn primary add-bookmark-btn">
-                                        ➕ 添加
-                                    </button>
+                                            ➕ 添加
+                                        </button>
                                 </div>
                             </form>
                         </div>
@@ -271,20 +271,20 @@
             <div class="function-area notebook-area">
                 <div class="card notebook-card">
                     <div class="notebook-header">
-                        <h2>📔 笔记本</h2>
+                    <h2>📔 笔记本</h2>
                         <div class="notebook-header-controls">
                             <input type="text" id="note-search" placeholder="搜索笔记..." class="note-search-compact">
                             <button id="add-note-btn" class="btn compact primary" title="新建笔记">
                                 ➕ 新建
-                            </button>
+                                    </button>
                             <button id="export-notes-btn" class="btn compact secondary" title="导出笔记">
-                                📥 导出
-                            </button>
+                                        📥 导出
+                                    </button>
                             <button id="toggle-sidebar-btn" class="btn compact secondary" title="折叠/展开笔记列表">
                                 📋 列表
                             </button>
-                        </div>
-                    </div>
+                                </div>
+                            </div>
                     <div class="notebook-container">
                         <div class="notebook-sidebar" id="notebook-sidebar">
                             <div class="notes-list" id="notes-list">
