@@ -902,6 +902,9 @@ function initTasks() {
     const sortBtns = document.querySelectorAll('.sort-btn');
     const quickAddBtn = document.getElementById('quick-add-task-btn');
     const generateReportBtn = document.getElementById('generate-report-btn');
+    const toggleSortBtn = document.getElementById('toggle-sort-btn');
+    const sortOptionsContainer = document.getElementById('sort-options');
+    
     // 初始化添加任务区域状态（默认隐藏）
     const addTaskSection = document.getElementById('add-task-section');
     const tasksContainer = document.querySelector('.tasks-container');
@@ -916,7 +919,80 @@ function initTasks() {
 
     taskForm.addEventListener('submit', addTask);
 
+    // 排序选项展开/折叠功能
+    toggleSortBtn.addEventListener('click', () => {
+        // 切换展开/折叠状态
+        const isExpanded = sortOptionsContainer.classList.contains('expanded');
+        
+        if (isExpanded) {
+            // 折叠选项
+            sortOptionsContainer.classList.remove('expanded');
+            toggleSortBtn.classList.remove('active');
+            setTimeout(() => {
+                sortOptionsContainer.style.display = 'none';
+            }, 300); // 等待过渡动画完成后隐藏
+        } else {
+            // 展开选项
+            sortOptionsContainer.style.display = 'block';
+            // 计算并定位下拉菜单，使其不超出可视区域
+            const toggleBtnRect = toggleSortBtn.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - toggleBtnRect.bottom;
+            
+            // 如果下方空间不足，则向上展示
+            if (spaceBelow < 180) {
+                sortOptionsContainer.style.bottom = '100%';
+                sortOptionsContainer.style.top = 'auto';
+                sortOptionsContainer.style.marginTop = '0';
+                sortOptionsContainer.style.marginBottom = '8px';
+            } else {
+                sortOptionsContainer.style.top = '100%';
+                sortOptionsContainer.style.bottom = 'auto';
+                sortOptionsContainer.style.marginTop = '8px';
+                sortOptionsContainer.style.marginBottom = '0';
+            }
+            
+            // 水平居中对齐
+            sortOptionsContainer.style.left = '50%';
+            sortOptionsContainer.style.transform = 'translateX(-50%)';
+            
+            // 使用setTimeout确保display变更后再添加过渡动画类
+            setTimeout(() => {
+                sortOptionsContainer.classList.add('expanded');
+                toggleSortBtn.classList.add('active');
+            }, 10);
+        }
+    });
+    
+    // 点击外部关闭排序选项
+    document.addEventListener('click', function(event) {
+        if (sortOptionsContainer.classList.contains('expanded') &&
+            !sortOptionsContainer.contains(event.target) &&
+            event.target !== toggleSortBtn) {
+            sortOptionsContainer.classList.remove('expanded');
+            toggleSortBtn.classList.remove('active');
+            setTimeout(() => {
+                sortOptionsContainer.style.display = 'none';
+            }, 300);
+        }
+    });
 
+    // 显示当前排序方式
+    function updateSortButtonText() {
+        const activeSort = document.querySelector('.sort-btn.active');
+        if (activeSort) {
+            // 提取排序按钮的文本和图标
+            const sortText = activeSort.textContent.trim();
+            // 仅提取emoji图标和文本的第一个字
+            const emojiIcon = sortText.substring(0, 2); // 获取emoji图标
+            const textPart = sortText.substring(2).trim(); // 获取文本部分
+            
+            toggleSortBtn.innerHTML = `🔄 排序: ${emojiIcon} ${textPart}`;
+        }
+    }
+    
+    // 初始化时更新排序按钮文本
+    updateSortButtonText();
 
     // 快速添加按钮功能 - 显示/隐藏任务添加表单
     quickAddBtn.addEventListener('click', () => {
@@ -973,6 +1049,18 @@ function initTasks() {
             btn.classList.add('active');
             currentSort = btn.dataset.sort;
             renderTasks();
+            
+            // 更新排序按钮文本并折叠排序选项
+            updateSortButtonText();
+            
+            // 折叠排序选项
+            setTimeout(() => {
+                sortOptionsContainer.classList.remove('expanded');
+                toggleSortBtn.classList.remove('active');
+                setTimeout(() => {
+                    sortOptionsContainer.style.display = 'none';
+                }, 300);
+            }, 500); // 延迟折叠，让用户能看到选择结果
         });
     });
 
@@ -1721,6 +1809,11 @@ function loadData() {
             document.querySelectorAll('.sort-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.sort === currentSort);
             });
+            
+            // 更新排序按钮显示文本
+            if (typeof updateSortButtonText === 'function') {
+                updateSortButtonText();
+            }
         }
 
         // 恢复记事本内容和状态

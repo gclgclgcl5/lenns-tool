@@ -153,11 +153,16 @@
                         <h2>✅ 工作清单管理</h2>
                         <div class="tasks-header-controls">
                             <div class="sorting-options">
-                                <label>排序:</label>
-                                <button class="btn secondary sort-btn active" data-sort="deadline">时间</button>
-                                <button class="btn secondary sort-btn" data-sort="difficulty">难度</button>
-                                <button class="btn secondary sort-btn" data-sort="implementation">实现</button>
-                                <button class="btn secondary sort-btn" data-sort="priority">智能</button>
+                                <button id="toggle-sort-btn" class="btn secondary compact-btn" title="展开/折叠排序选项">
+                                    🔄 排序
+                                </button>
+                                <div id="sort-options" class="sort-options-container" style="display: none;">
+                                    <label>排序方式</label>
+                                    <button class="btn secondary sort-btn active" data-sort="deadline">⏱️ 时间</button>
+                                    <button class="btn secondary sort-btn" data-sort="difficulty">🔥 难度</button>
+                                    <button class="btn secondary sort-btn" data-sort="implementation">⚙️ 实现</button>
+                                    <button class="btn secondary sort-btn" data-sort="priority">🧠 智能</button>
+                                </div>
                             </div>
                         <div class="task-buttons">
                                 <button id="generate-report-btn" class="generate-report-btn" title="一键生成周报">

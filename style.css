@@ -2475,3 +2475,120 @@ textarea {
         justify-content: center;
     }
 }
+
+/* 排序选项容器样式 */
+.sort-options-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    border-radius: 10px;
+    margin-top: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
+    padding: 0;
+    width: max-content;
+    min-width: 140px;
+    position: absolute;
+    z-index: 100;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    transform: translateY(-10px) translateX(-50%);
+}
+
+/* 展开状态的排序选项 */
+.sort-options-container.expanded {
+    max-height: 220px; /* 增加高度以适应垂直排列 */
+    padding: 10px;
+    opacity: 1;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    transform: translateY(0) translateX(-50%);
+}
+
+/* 排序选项垂直排列 */
+.sort-options-container label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #555;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+    text-align: center;
+}
+
+/* 排序按钮垂直排列 */
+.sort-options-container .sort-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin: 6px 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid transparent;
+    font-size: 0.95rem;
+}
+
+.sort-options-container .sort-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(3px);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+.sort-options-container .sort-btn.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+}
+
+.sort-options-container .sort-btn.active::before {
+    content: "✓ ";
+    font-weight: bold;
+}
+
+/* 排序按钮容器定位 */
+.sorting-options {
+    position: relative;
+}
+
+/* 排序切换按钮 */
+#toggle-sort-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    color: #555;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+#toggle-sort-btn:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(102, 126, 234, 0.2);
+}
+
+#toggle-sort-btn.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: transparent;
+}
+
+/* 添加排序按钮图标旋转动画 */
+@keyframes rotateIcon {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+#toggle-sort-btn.active::before {
+    content: "🔄";
+    display: inline-block;
+    margin-right: 5px;
+    animation: rotateIcon 1s linear;
+}
