@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function initNotepad() {
     const compareModeBtn = document.getElementById('compare-mode-btn');
     const clearNotesBtn = document.getElementById('clear-notes-btn');
+    const removePunctuationBtn = document.getElementById('remove-punctuation-btn');
     const notepad1 = document.getElementById('notepad1');
     const notepad2 = document.getElementById('notepad2');
     const notepad2Section = document.getElementById('notepad2-section');
@@ -67,6 +68,22 @@ function initNotepad() {
         }
     });
 
+    // 去除标点符号和空格
+    removePunctuationBtn.addEventListener('click', () => {
+        // 处理第一个记事本
+        if (notepad1.value) {
+            notepad1.value = removePunctuationAndSpaces(notepad1.value);
+        }
+        
+        // 如果是对比模式，也处理第二个记事本
+        if (notepadCompareMode && notepad2.value) {
+            notepad2.value = removePunctuationAndSpaces(notepad2.value);
+        }
+        
+        saveData();
+        showNotification('已去除标点符号和空格', 'success');
+    });
+
     // 自动保存记事本内容
     notepad1.addEventListener('input', () => {
         saveData();
@@ -94,6 +111,17 @@ function initNotepad() {
             e.preventDefault();
         }
     }
+}
+
+// 去除文本中的标点符号和空格
+function removePunctuationAndSpaces(text) {
+    if (!text) return '';
+    
+    // 匹配中文标点符号、英文标点符号和空格
+    const punctuationRegex = /[\u2000-\u206F\u2E00-\u2E7F\u3000-\u303F\uFF00-\uFFEF!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~\s]/g;
+    
+    // 替换所有标点符号和空格为空字符串
+    return text.replace(punctuationRegex, '');
 }
 
 // 初始化拖拽功能
