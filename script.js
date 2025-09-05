@@ -48,11 +48,41 @@ function initNotepad() {
             notepadArea.classList.add('compare-mode');
             compareModeBtn.innerHTML = '📖 单栏模式';
             showNotification('已开启对比模式', 'info');
+            
+            // 在对比模式下添加比较结果区域和比较按钮
+            const notepadContainer = document.querySelector('.notepad-container');
+            if (!document.getElementById('compare-container')) {
+                const compareContainer = document.createElement('div');
+                compareContainer.id = 'compare-container';
+                compareContainer.className = 'compare-container';
+                
+                // 添加比较按钮
+                const compareBtn = document.createElement('button');
+                compareBtn.id = 'compare-texts-btn';
+                compareBtn.className = 'btn primary';
+                compareBtn.textContent = '🔍 比较文本';
+                compareBtn.addEventListener('click', compareTexts);
+                
+                // 创建结果容器
+                const comparisonResult = document.createElement('div');
+                comparisonResult.id = 'comparison-result';
+                comparisonResult.className = 'comparison-result';
+                comparisonResult.style.display = 'none'; // 初始隐藏
+                
+                // 添加到容器
+                compareContainer.appendChild(compareBtn);
+                compareContainer.appendChild(comparisonResult);
+                notepadContainer.appendChild(compareContainer);
+            }
         } else {
             notepad2Section.style.display = 'none';
             notepadArea.classList.remove('compare-mode');
             compareModeBtn.innerHTML = '📖 对比模式';
             showNotification('已关闭对比模式', 'info');
+            
+            // 移除比较结果区域
+            const compareContainer = document.getElementById('compare-container');
+            if (compareContainer) compareContainer.remove();
         }
 
         saveData();
@@ -111,6 +141,23 @@ function initNotepad() {
             e.preventDefault();
         }
     }
+    
+    // 比较两个文本框内容，显示差异和CER率
+    function compareTexts() {
+        const reference = notepad1.value.trim();
+        const hypothesis = notepad2.value.trim();
+        
+        if (!reference || !hypothesis) {
+            showNotification('请在两个记事本中都输入文本', 'error');
+            return;
+        }
+        
+        // 计算编辑距离和错误率
+        const result = calculateEditDistance(reference, hypothesis);
+        
+        // 显示结果
+        displayComparisonResult(result, reference, hypothesis);
+    }
 }
 
 // 去除文本中的标点符号和空格
@@ -122,6 +169,180 @@ function removePunctuationAndSpaces(text) {
     
     // 替换所有标点符号和空格为空字符串
     return text.replace(punctuationRegex, '');
+}
+
+/**
+ * 计算编辑距离（Levenshtein距离）
+ */
+function calculateEditDistance(reference, hypothesis) {
+    const refLen = reference.length;
+    const hypLen = hypothesis.length;
+    
+    // 创建距离矩阵
+    const distance = Array(refLen + 1).fill().map(() => Array(hypLen + 1).fill(0));
+    
+    // 初始化第一行和第一列
+    for (let i = 0; i <= refLen; i++) {
+        distance[i][0] = i;
+    }
+    for (let j = 0; j <= hypLen; j++) {
+        distance[0][j] = j;
+    }
+    
+    // 填充矩阵
+    for (let i = 1; i <= refLen; i++) {
+        for (let j = 1; j <= hypLen; j++) {
+            const cost = reference[i-1] === hypothesis[j-1] ? 0 : 1;
+            distance[i][j] = Math.min(
+                distance[i-1][j] + 1,      // 删除
+                distance[i][j-1] + 1,      // 插入
+                distance[i-1][j-1] + cost  // 替换
+            );
+        }
+    }
+    
+    // 回溯找出操作类型
+    const operations = backtraceOperations(distance, reference, hypothesis);
+    
+    // 计算各种错误数量
+    const subs = operations.filter(op => op.type === 'substitution').length;
+    const dels = operations.filter(op => op.type === 'deletion').length;
+    const ins = operations.filter(op => op.type === 'insertion').length;
+    
+    // 计算CER
+    const cer = refLen > 0 ? (subs + dels + ins) / refLen : 0;
+    
+    return {
+        distance: distance[refLen][hypLen],
+        cer: cer,
+        substitutions: subs,
+        deletions: dels,
+        insertions: ins,
+        totalChars: refLen,
+        operations: operations
+    };
+}
+
+/**
+ * 回溯操作类型
+ */
+function backtraceOperations(distance, reference, hypothesis) {
+    const operations = [];
+    let i = reference.length;
+    let j = hypothesis.length;
+    
+    while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && reference[i-1] === hypothesis[j-1]) {
+            // 字符相同
+            operations.unshift({
+                type: 'equal',
+                refChar: reference[i-1],
+                hypChar: hypothesis[j-1]
+            });
+            i--;
+            j--;
+        } else if (i > 0 && j > 0 && distance[i][j] === distance[i-1][j-1] + 1) {
+            // 替换
+            operations.unshift({
+                type: 'substitution',
+                refChar: reference[i-1],
+                hypChar: hypothesis[j-1]
+            });
+            i--;
+            j--;
+        } else if (i > 0 && distance[i][j] === distance[i-1][j] + 1) {
+            // 删除
+            operations.unshift({
+                type: 'deletion',
+                refChar: reference[i-1],
+                hypChar: null
+            });
+            i--;
+        } else if (j > 0 && distance[i][j] === distance[i][j-1] + 1) {
+            // 插入
+            operations.unshift({
+                type: 'insertion',
+                refChar: null,
+                hypChar: hypothesis[j-1]
+            });
+            j--;
+        }
+    }
+    
+    return operations;
+}
+
+/**
+ * 显示比较结果
+ */
+function displayComparisonResult(result, reference, hypothesis) {
+    // 获取比较结果容器
+    let comparisonResult = document.getElementById('comparison-result');
+    if (!comparisonResult) {
+        console.error('未找到比较结果容器');
+        return;
+    }
+    
+    // 显示结果容器
+    comparisonResult.style.display = 'block';
+    
+    // 生成HTML内容
+    let refHTML = '';
+    let hypHTML = '';
+    
+    result.operations.forEach(op => {
+        switch (op.type) {
+            case 'equal':
+                refHTML += `<span class="char-equal">${op.refChar}</span>`;
+                hypHTML += `<span class="char-equal">${op.hypChar}</span>`;
+                break;
+            case 'substitution':
+                refHTML += `<span class="char-substitution">${op.refChar}</span>`;
+                hypHTML += `<span class="char-substitution">${op.hypChar}</span>`;
+                break;
+            case 'deletion':
+                refHTML += `<span class="char-deletion">${op.refChar}</span>`;
+                hypHTML += `<span class="char-deletion">-</span>`;
+                break;
+            case 'insertion':
+                refHTML += `<span class="char-insertion">-</span>`;
+                hypHTML += `<span class="char-insertion">${op.hypChar}</span>`;
+                break;
+        }
+    });
+    
+    // 构建HTML
+    comparisonResult.innerHTML = `
+        <div class="comparison-header">
+            <h3>文本对比结果</h3>
+            <div class="cer-result">字符错误率(CER): <span>${(result.cer * 100).toFixed(2)}%</span></div>
+        </div>
+        <div class="comparison-stats">
+            <div class="stat-item">替换错误(S): <span>${result.substitutions}</span></div>
+            <div class="stat-item">删除错误(D): <span>${result.deletions}</span></div>
+            <div class="stat-item">插入错误(I): <span>${result.insertions}</span></div>
+            <div class="stat-item">字符总数(N): <span>${result.totalChars}</span></div>
+        </div>
+        <div class="text-comparison">
+            <div class="comparison-line">
+                <span class="comparison-label">标准文本：</span>
+                <div class="comparison-text">${refHTML}</div>
+            </div>
+            <div class="comparison-line">
+                <span class="comparison-label">对比文本：</span>
+                <div class="comparison-text">${hypHTML}</div>
+            </div>
+        </div>
+        <div class="legend">
+            <div><span class="sample char-equal">相同</span> 文本相同</div>
+            <div><span class="sample char-substitution">替换</span> 文本替换</div>
+            <div><span class="sample char-deletion">删除</span> 标准文本中存在，对比文本中删除</div>
+            <div><span class="sample char-insertion">插入</span> 标准文本中不存在，对比文本中插入</div>
+        </div>
+    `;
+    
+    // 滚动到结果区域
+    comparisonResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // 初始化拖拽功能

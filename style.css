@@ -2592,3 +2592,194 @@ textarea {
     margin-right: 5px;
     animation: rotateIcon 1s linear;
 }
+
+/* 文本对比相关样式 */
+.comparison-result {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 10px;
+}
+
+.comparison-header h3 {
+    margin: 0;
+    color: #667eea;
+    font-size: 1.1rem;
+}
+
+.cer-result {
+    font-weight: bold;
+}
+
+.cer-result span {
+    color: #667eea;
+    font-size: 1.2rem;
+}
+
+.comparison-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #eaeaea;
+}
+
+.comparison-stats .stat-item {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.comparison-stats .stat-item span {
+    font-weight: bold;
+    color: #333;
+    margin-left: 5px;
+}
+
+.text-comparison {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #eaeaea;
+    border-radius: 6px;
+    background: #fff;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.comparison-line {
+    display: flex;
+    margin-bottom: 10px;
+    font-family: monospace;
+    line-height: 1.8;
+}
+
+.comparison-label {
+    flex: 0 0 80px;
+    font-weight: bold;
+    color: #666;
+}
+
+.comparison-text {
+    flex: 1;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* 字符颜色标记 */
+.char-equal {
+    color: #333;
+}
+
+.char-substitution {
+    color: #f57c00;
+    background-color: rgba(245, 124, 0, 0.1);
+    text-decoration: line-through;
+    padding: 0 2px;
+}
+
+.char-insertion {
+    color: #d32f2f;
+    background-color: rgba(211, 47, 47, 0.1);
+    text-decoration: underline;
+    padding: 0 2px;
+}
+
+.char-deletion {
+    color: #388e3c;
+    background-color: rgba(56, 142, 60, 0.1);
+    padding: 0 2px;
+}
+
+/* 图例 */
+.legend {
+    font-size: 0.85rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.legend div {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.sample {
+    display: inline-block;
+    margin-right: 5px;
+    padding: 2px 5px;
+}
+
+/* 比较按钮样式 */
+#compare-texts-btn {
+    display: block;
+    margin: 15px auto;
+    padding: 8px 20px;
+}
+
+/* 对比模式下的布局调整 */
+.compare-mode .notepad-container {
+    flex-direction: column;
+}
+
+.compare-mode .note-section {
+    margin-bottom: 15px;
+}
+
+/* 比较容器 */
+.compare-container {
+    margin-top: 20px;
+    width: 100%;
+}
+
+#compare-texts-btn {
+    display: block;
+    margin: 0 auto 15px;
+    padding: 10px 25px;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+}
+
+#compare-texts-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+}
+
+#compare-texts-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(102, 126, 234, 0.4);
+}
+
+/* 改进对比模式下的布局 */
+.compare-mode .notepad-container {
+    flex-direction: column;
+}
+
+.compare-mode .note-section {
+    flex: none;
+    margin-bottom: 15px;
+}
+
+.compare-mode #notepad1,
+.compare-mode #notepad2 {
+    height: 200px;
+    min-height: 150px;
+}
